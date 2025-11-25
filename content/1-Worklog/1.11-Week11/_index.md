@@ -1,57 +1,42 @@
 ---
 title: "Week 11 Worklog"
-date: "2025-01-01"
+date: "2025-11-16"
 weight: 2
 chapter: false
 pre: " <b> 1.11. </b> "
 ---
-{{% notice warning %}} 
+
+{{% notice warning %}}
 ⚠️ **Note:** The following information is for reference purposes only. Please **do not copy verbatim** for your own report, including this warning.
 {{% /notice %}}
 
+### Week 11 Objectives
 
-### Week 11 Objectives:
+- Implement comprehensive monitoring using CloudWatch.
+- Create dashboards and alarms for application health.
+- Set up logging aggregation and analysis.
 
-* Connect and get acquainted with members of First Cloud Journey.
-* Understand basic AWS services, how to use the console & CLI.
+### Tasks carried out this week
+| Day | Task | Start Date | Completion Date | Reference Material |
+|-----|------|------------|-----------------|--------------------|
+| Mon | - Create CloudWatch dashboards for key metrics <br> - Set up custom metrics from application logs | 06/11/2025 | 09/11/2025 | <a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/">CloudWatch Documentation</a> |
+| Tue | - Configure CloudWatch alarms for CPU, memory, and network <br> - Set up SNS topics for alarm notifications | 06/11/2025 | 09/11/2025 | <a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/">Events Guide</a> |
+| Wed | - Enable detailed CloudWatch logs for ECS tasks <br> - Create log groups and configure retention policies | 06/11/2025 | 09/11/2025 | <a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/">Logs Guide</a> |
+| Thu | - Set up CloudWatch Insights for log analysis <br> - Create queries for common troubleshooting scenarios | 06/11/2025 | 09/11/2025 | <a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/AnalyzingLogData.html">CloudWatch Insights</a> |
+| Fri | - Configure application to send custom metrics to CloudWatch <br> - Test alarm triggering and notification flow | 06/11/2025 | 09/11/2025 | <a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/working_with_metrics.html">Metrics Guide</a> |
+| Sat | - Review and optimize dashboard layout <br> - Document monitoring architecture and alert thresholds | 06/11/2025 | 09/11/2025 | — |
 
-### Tasks to be carried out this week:
-| Day | Task                                                                                                                                                                                                   | Start Date | Completion Date | Reference Material                        |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------- | --------------- | ----------------------------------------- |
-| 2   | - Get acquainted with FCJ members <br> - Read and take note of internship unit rules and regulations                                                                                                   | 08/11/2025 | 08/11/2025      |
-| 3   | - Learn about AWS and its types of services <br>&emsp; + Compute <br>&emsp; + Storage <br>&emsp; + Networking <br>&emsp; + Database <br>&emsp; + ... <br>                                              | 08/12/2025 | 08/12/2025      | <https://cloudjourney.awsstudygroup.com/> |
-| 4   | - Create AWS Free Tier account <br> - Learn about AWS Console & AWS CLI <br> - **Practice:** <br>&emsp; + Create AWS account <br>&emsp; + Install & configure AWS CLI <br> &emsp; + How to use AWS CLI | 08/13/2025 | 08/13/2025      | <https://cloudjourney.awsstudygroup.com/> |
-| 5   | - Learn basic EC2: <br>&emsp; + Instance types <br>&emsp; + AMI <br>&emsp; + EBS <br>&emsp; + ... <br> - SSH connection methods to EC2 <br> - Learn about Elastic IP   <br>                            | 08/14/2025 | 08/15/2025      | <https://cloudjourney.awsstudygroup.com/> |
-| 6   | - **Practice:** <br>&emsp; + Launch an EC2 instance <br>&emsp; + Connect via SSH <br>&emsp; + Attach an EBS volume                                                                                     | 08/15/2025 | 08/15/2025      | <https://cloudjourney.awsstudygroup.com/> |
+### Week 11 Achievements
 
+- Created comprehensive CloudWatch dashboards showing system health.
+- Configured proactive alarms for key performance indicators (CPU, memory, error rates).
+- Implemented centralized logging for all ECS tasks and services.
+- Set up CloudWatch Insights queries for rapid troubleshooting.
+- Verified SNS notifications delivery for critical alerts.
+- Achieved real-time visibility into application and infrastructure performance.
 
-### Week 11 Achievements:
+### Challenges and lessons learned
 
-* Understood what AWS is and mastered the basic service groups: 
-  * Compute
-  * Storage
-  * Networking 
-  * Database
-  * ...
-
-* Successfully created and configured an AWS Free Tier account.
-
-* Became familiar with the AWS Management Console and learned how to find, access, and use services via the web interface.
-
-* Installed and configured AWS CLI on the computer, including:
-  * Access Key
-  * Secret Key
-  * Default Region
-  * ...
-
-* Used AWS CLI to perform basic operations such as:
-
-  * Check account & configuration information
-  * Retrieve the list of regions
-  * View EC2 service
-  * Create and manage key pairs
-  * Check information about running services
-  * ...
-
-* Acquired the ability to connect between the web interface and CLI to manage AWS resources in parallel.
-* ...
+- Custom metrics incur additional CloudWatch costs; be selective about what to monitor.
+- Log retention policies should balance storage costs with compliance requirements.
+- Alarm thresholds require tuning to avoid false positives and alert fatigue.

@@ -1,57 +1,42 @@
 ---
 title: "Week 10 Worklog"
-date: "2025-01-01"
+date: "2025-11-09"
 weight: 2
 chapter: false
 pre: " <b> 1.10. </b> "
 ---
-{{% notice warning %}} 
+
+{{% notice warning %}}
 ⚠️ **Note:** The following information is for reference purposes only. Please **do not copy verbatim** for your own report, including this warning.
 {{% /notice %}}
 
+### Week 10 Objectives
 
-### Week 10 Objectives:
+- Optimize S3 storage and implement lifecycle policies.
+- Configure S3 for static website hosting with CloudFront.
+- Implement data encryption and access controls for S3 buckets.
 
-* Connect and get acquainted with members of First Cloud Journey.
-* Understand basic AWS services, how to use the console & CLI.
+### Tasks carried out this week
+| Day | Task | Start Date | Completion Date | Reference Material |
+|-----|------|------------|-----------------|--------------------|
+| Mon | - Review S3 bucket structure and storage classes <br> - Plan lifecycle policies for cost optimization | 30/10/2025 | 02/11/2025 | <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/">S3 Documentation</a> |
+| Tue | - Create S3 lifecycle rules for transitioning objects <br> - Configure versioning and MFA delete protection | 30/10/2025 | 02/11/2025 | <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lifecycle-mgmt.html">Lifecycle Management</a> |
+| Wed | - Enable server-side encryption (SSE-S3) for all objects <br> - Configure bucket policies for access control | 30/10/2025 | 02/11/2025 | <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/security.html">S3 Security</a> |
+| Thu | - Enable S3 access logging and configure CloudTrail for audit <br> - Set up bucket inventory for analysis | 30/10/2025 | 02/11/2025 | <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/ServerLogs.html">Logging Guide</a> |
+| Fri | - Implement presigned URLs for temporary object access <br> - Test access control and permissions | 30/10/2025 | 02/11/2025 | <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/PresignedUrlUploadObject.html">Presigned URLs</a> |
+| Sat | - Estimate cost savings from lifecycle policies <br> - Document S3 bucket configuration and access patterns | 30/10/2025 | 02/11/2025 | — |
 
-### Tasks to be carried out this week:
-| Day | Task                                                                                                                                                                                                   | Start Date | Completion Date | Reference Material                        |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------- | --------------- | ----------------------------------------- |
-| 2   | - Get acquainted with FCJ members <br> - Read and take note of internship unit rules and regulations                                                                                                   | 08/11/2025 | 08/11/2025      |
-| 3   | - Learn about AWS and its types of services <br>&emsp; + Compute <br>&emsp; + Storage <br>&emsp; + Networking <br>&emsp; + Database <br>&emsp; + ... <br>                                              | 08/12/2025 | 08/12/2025      | <https://cloudjourney.awsstudygroup.com/> |
-| 4   | - Create AWS Free Tier account <br> - Learn about AWS Console & AWS CLI <br> - **Practice:** <br>&emsp; + Create AWS account <br>&emsp; + Install & configure AWS CLI <br> &emsp; + How to use AWS CLI | 08/13/2025 | 08/13/2025      | <https://cloudjourney.awsstudygroup.com/> |
-| 5   | - Learn basic EC2: <br>&emsp; + Instance types <br>&emsp; + AMI <br>&emsp; + EBS <br>&emsp; + ... <br> - SSH connection methods to EC2 <br> - Learn about Elastic IP   <br>                            | 08/14/2025 | 08/15/2025      | <https://cloudjourney.awsstudygroup.com/> |
-| 6   | - **Practice:** <br>&emsp; + Launch an EC2 instance <br>&emsp; + Connect via SSH <br>&emsp; + Attach an EBS volume                                                                                     | 08/15/2025 | 08/15/2025      | <https://cloudjourney.awsstudygroup.com/> |
+### Week 10 Achievements
 
+- Implemented S3 lifecycle policies to transition old objects to Glacier storage.
+- Configured bucket encryption and access logging for compliance.
+- Set up presigned URLs for secure, time-limited object access.
+- Enabled versioning and bucket inventory for data management.
+- Calculated potential 40% cost reduction through storage class optimization.
+- Learned S3 bucket policies, IAM roles, and access control strategies.
 
-### Week 10 Achievements:
+### Challenges and lessons learned
 
-* Understood what AWS is and mastered the basic service groups: 
-  * Compute
-  * Storage
-  * Networking 
-  * Database
-  * ...
-
-* Successfully created and configured an AWS Free Tier account.
-
-* Became familiar with the AWS Management Console and learned how to find, access, and use services via the web interface.
-
-* Installed and configured AWS CLI on the computer, including:
-  * Access Key
-  * Secret Key
-  * Default Region
-  * ...
-
-* Used AWS CLI to perform basic operations such as:
-
-  * Check account & configuration information
-  * Retrieve the list of regions
-  * View EC2 service
-  * Create and manage key pairs
-  * Check information about running services
-  * ...
-
-* Acquired the ability to connect between the web interface and CLI to manage AWS resources in parallel.
-* ...
+- Lifecycle transitions have minimum object age requirements; plan accordingly.
+- Presigned URL generation requires proper IAM permissions for the generating role.
+- Enabling versioning increases storage costs due to retained object versions.
