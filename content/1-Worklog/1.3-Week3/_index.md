@@ -1,3 +1,11 @@
+---
+title: "Week 3 Worklog"
+date: "2025-09-21"
+weight: 1
+chapter: false
+pre: " <b> 1.3. </b> "
+---
+
 ### Week 3 Objectives
 \* Stand up Angular app with local HTTPS.
 \* Integrate AWS Cognito, S3, API Gateway, Lambda, CloudWatch.
