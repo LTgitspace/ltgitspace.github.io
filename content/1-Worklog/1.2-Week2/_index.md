@@ -1,57 +1,37 @@
 ---
 title: "Week 2 Worklog"
-date: "2025-01-01"
+date: "2025-09-21"
 weight: 1
 chapter: false
-pre: " <b> 1.2. </b> "
+pre: " <b> 1.1. </b> "
 ---
-{{% notice warning %}} 
-⚠️ **Note:** The following information is for reference purposes only. Please **do not copy verbatim** for your own report, including this warning.
-{{% /notice %}}
 
 
-### Week 2 Objectives:
+### Week 2 Objectives
 
-* Connect and get acquainted with members of First Cloud Journey.
-* Understand basic AWS services, how to use the console & CLI.
+- Learn commonly used AWS services in more depth.
+- Join a major AWS event and capture key takeaways.
 
-### Tasks to be carried out this week:
-| Day | Task                                                                                                                                                                                                   | Start Date | Completion Date | Reference Material                        |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------- | --------------- | ----------------------------------------- |
-| 2   | - Get acquainted with FCJ members <br> - Read and take note of internship unit rules and regulations                                                                                                   | 08/11/2025 | 08/11/2025      |
-| 3   | - Learn about AWS and its types of services <br>&emsp; + Compute <br>&emsp; + Storage <br>&emsp; + Networking <br>&emsp; + Database <br>&emsp; + ... <br>                                              | 08/12/2025 | 08/12/2025      | <https://cloudjourney.awsstudygroup.com/> |
-| 4   | - Create AWS Free Tier account <br> - Learn about AWS Console & AWS CLI <br> - **Practice:** <br>&emsp; + Create AWS account <br>&emsp; + Install & configure AWS CLI <br> &emsp; + How to use AWS CLI | 08/13/2025 | 08/13/2025      | <https://cloudjourney.awsstudygroup.com/> |
-| 5   | - Learn basic EC2: <br>&emsp; + Instance types <br>&emsp; + AMI <br>&emsp; + EBS <br>&emsp; + ... <br> - SSH connection methods to EC2 <br> - Learn about Elastic IP   <br>                            | 08/14/2025 | 08/15/2025      | <https://cloudjourney.awsstudygroup.com/> |
-| 6   | - **Practice:** <br>&emsp; + Launch an EC2 instance <br>&emsp; + Connect via SSH <br>&emsp; + Attach an EBS volume                                                                                     | 08/15/2025 | 08/15/2025      | <https://cloudjourney.awsstudygroup.com/> |
+### Tasks carried out this week
+| Day | Task | Start Date | Completion Date | Reference Material |
+|-----|------|------------|-----------------|--------------------|
+| Mon | - Team scrum for project proposal <br> - Set up Linux environment | 11/09/2025 | 14/09/2025 | — |
+| Tue | — | 11/09/2025 | 14/09/2025 | — |
+| Wed | - Help teammates set up Linux and Windows environments | 11/09/2025 | 14/09/2025 | <a href="https://ubuntu.com/tutorials">Ubuntu tutorials</a> · <a href="https://learn.microsoft.com/windows/wsl/install">WSL install</a> |
+| Thu | - Attend AWS Cloud Day event | 11/09/2025 | 14/09/2025 | <a href="https://aws.amazon.com/events/">AWS events</a> |
+| Fri | - Acquire domain on Route 53 and[week2.md](week2.md) set up SSL via Cloudflare <br> - Read docs for EC2, ECS, ECR, EKS, VPC, Lambda | 11/09/2025 | 14/09/2025 | <a href="https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/domain-register.html">Route 53: Register domain</a> · <a href="https://developers.cloudflare.com/ssl/">Cloudflare SSL/TLS</a> · <a href="https://docs.aws.amazon.com/ec2/">EC2</a> · <a href="https://docs.aws.amazon.com/AmazonECS/latest/developerguide/Welcome.html">ECS</a> · <a href="https://docs.aws.amazon.com/AmazonECR/latest/userguide/what-is-ecr.html">ECR</a> · <a href="https://docs.aws.amazon.com/eks/latest/userguide/what-is-eks.html">EKS</a> · <a href="https://docs.aws.amazon.com/vpc/">VPC</a> · <a href="https://docs.aws.amazon.com/lambda/latest/dg/welcome.html">Lambda</a> |
+| Sat | - Learn EC2 Auto Scaling and deploy an existing backend on EC2 with Docker | 11/09/2025 | 14/09/2025 | <a href="https://docs.aws.amazon.com/autoscaling/ec2/userguide/what-is-amazon-ec2-auto-scaling.html">EC2 Auto Scaling</a> · <a href="https://docs.docker.com/engine/install/">Install Docker</a> |
 
+### Week 2 Achievements
 
-### Week 2 Achievements:
+- Deployed a web application with a custom domain and HTTPS termination via Cloudflare.
+- Helped teammates standardize development environments (Linux/Windows) for smoother collaboration.
+- Strengthened knowledge across key AWS services: EC2, ECS, ECR, EKS, VPC, and Lambda.
+- Practiced scaling concepts with EC2 Auto Scaling and containerized deployment with Docker on EC2.
 
-* Understood what AWS is and mastered the basic service groups: 
-  * Compute
-  * Storage
-  * Networking 
-  * Database
-  * ...
+### Challenges and lessons learned
 
-* Successfully created and configured an AWS Free Tier account.
-
-* Became familiar with the AWS Management Console and learned how to find, access, and use services via the web interface.
-
-* Installed and configured AWS CLI on the computer, including:
-  * Access Key
-  * Secret Key
-  * Default Region
-  * ...
-
-* Used AWS CLI to perform basic operations such as:
-
-  * Check account & configuration information
-  * Retrieve the list of regions
-  * View EC2 service
-  * Create and manage key pairs
-  * Check information about running services
-  * ...
-
-* Acquired the ability to connect between the web interface and CLI to manage AWS resources in parallel.
-* ...
+- DNS and certificate changes can take time to propagate; plan for TTLs and validate records before cutover.
+- Mixing providers (Route 53 + Cloudflare) requires careful name server and SSL/TLS configuration.
+- Environment setup differs across OSes—document a minimal, repeatable setup path for teammates.
+- When troubleshooting deployments on EC2, start with security groups, NACLs, and instance logs.
