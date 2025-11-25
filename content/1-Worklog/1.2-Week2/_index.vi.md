@@ -1,59 +1,40 @@
 ---
 title: "Worklog Tuần 2"
-date: "2025-01-01"
+date: "2025-09-21"
 weight: 1
 chapter: false
 pre: " <b> 1.2. </b> "
 ---
+
 {{% notice warning %}}
 ⚠️ **Lưu ý:** Các thông tin dưới đây chỉ nhằm mục đích tham khảo, vui lòng **không sao chép nguyên văn** cho bài báo cáo của bạn kể cả warning này.
 {{% /notice %}}
 
+### Mục tiêu Tuần 2
 
-### Mục tiêu tuần 2:
+- Học các dịch vụ AWS được sử dụng phổ biến một cách sâu hơn.
+- Tham gia một sự kiện AWS lớn và ghi lại những hiểu biết chính.
 
-* Kết nối, làm quen với các thành viên trong First Cloud Journey.
-* Hiểu dịch vụ AWS cơ bản, cách dùng console & CLI.
+### Các công việc thực hiện trong tuần này
+| Ngày | Công việc | Ngày bắt đầu | Ngày hoàn thành | Tài liệu tham khảo |
+|-----|------|------------|-----------------|--------------------|
+| Thứ 2 | - Scrum đội để phát triển đề xuất dự án <br> - Thiết lập môi trường Linux | 11/09/2025 | 14/09/2025 | — |
+| Thứ 3 | — | 11/09/2025 | 14/09/2025 | — |
+| Thứ 4 | - Giúp các thành viên đội thiết lập môi trường Linux và Windows | 11/09/2025 | 14/09/2025 | <a href="https://ubuntu.com/tutorials">Hướng dẫn Ubuntu</a> · <a href="https://learn.microsoft.com/windows/wsl/install">Cài đặt WSL</a> |
+| Thứ 5 | - Tham gia sự kiện AWS Cloud Day | 11/09/2025 | 14/09/2025 | <a href="https://aws.amazon.com/events/">Sự kiện AWS</a> |
+| Thứ 6 | - Mua tên miền trên Route 53 và thiết lập SSL qua Cloudflare <br> - Đọc tài liệu cho EC2, ECS, ECR, EKS, VPC, Lambda | 11/09/2025 | 14/09/2025 | <a href="https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/domain-register.html">Route 53: Đăng ký tên miền</a> · <a href="https://developers.cloudflare.com/ssl/">Cloudflare SSL/TLS</a> · <a href="https://docs.aws.amazon.com/ec2/">EC2</a> · <a href="https://docs.aws.amazon.com/AmazonECS/latest/developerguide/Welcome.html">ECS</a> · <a href="https://docs.aws.amazon.com/AmazonECR/latest/userguide/what-is-ecr.html">ECR</a> · <a href="https://docs.aws.amazon.com/eks/latest/userguide/what-is-eks.html">EKS</a> · <a href="https://docs.aws.amazon.com/vpc/">VPC</a> · <a href="https://docs.aws.amazon.com/lambda/latest/dg/welcome.html">Lambda</a> |
+| Thứ 7 | - Học EC2 Auto Scaling và triển khai một backend hiện có trên EC2 với Docker | 11/09/2025 | 14/09/2025 | <a href="https://docs.aws.amazon.com/autoscaling/ec2/userguide/what-is-amazon-ec2-auto-scaling.html">EC2 Auto Scaling</a> · <a href="https://docs.docker.com/engine/install/">Cài đặt Docker</a> |
 
-### Các công việc cần triển khai trong tuần này:
-| Thứ | Công việc                                                                                                                                                                                   | Ngày bắt đầu | Ngày hoàn thành | Nguồn tài liệu                            |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ | --------------- | ----------------------------------------- |
-| 2   | - Làm quen với các thành viên FCJ <br> - Đọc và lưu ý các nội quy, quy định tại đơn vị thực tập                                                                                             | 11/08/2025   | 11/08/2025      |
-| 3   | - Tìm hiểu AWS và các loại dịch vụ <br>&emsp; + Compute <br>&emsp; + Storage <br>&emsp; + Networking <br>&emsp; + Database <br>&emsp; + ... <br>                                            | 12/08/2025   | 12/08/2025      | <https://cloudjourney.awsstudygroup.com/> |
-| 4   | - Tạo AWS Free Tier account <br> - Tìm hiểu AWS Console & AWS CLI <br> - **Thực hành:** <br>&emsp; + Tạo AWS account <br>&emsp; + Cài AWS CLI & cấu hình <br> &emsp; + Cách sử dụng AWS CLI | 13/08/2025   | 13/08/2025      | <https://cloudjourney.awsstudygroup.com/> |
-| 5   | - Tìm hiểu EC2 cơ bản: <br>&emsp; + Instance types <br>&emsp; + AMI <br>&emsp; + EBS <br>&emsp; + ... <br> - Các cách remote SSH vào EC2 <br> - Tìm hiểu Elastic IP   <br>                  | 14/08/2025   | 15/08/2025      | <https://cloudjourney.awsstudygroup.com/> |
-| 6   | - **Thực hành:** <br>&emsp; + Tạo EC2 instance <br>&emsp; + Kết nối SSH <br>&emsp; + Gắn EBS volume                                                                                         | 15/08/2025   | 15/08/2025      | <https://cloudjourney.awsstudygroup.com/> |
+### Những thành tích của Tuần 2
 
+- Triển khai một ứng dụng web với một tên miền tùy chỉnh và HTTPS termination qua Cloudflare.
+- Giúp các thành viên đội chuẩn hóa môi trường phát triển (Linux/Windows) để cộng tác mượt mà hơn.
+- Tăng cường kiến thức trên các dịch vụ AWS chính: EC2, ECS, ECR, EKS, VPC, và Lambda.
+- Thực hành các khái niệm scaling với EC2 Auto Scaling và triển khai containerized với Docker trên EC2.
 
-### Kết quả đạt được tuần 2:
+### Những thách thức và bài học
 
-* Hiểu AWS là gì và nắm được các nhóm dịch vụ cơ bản: 
-  * Compute
-  * Storage
-  * Networking 
-  * Database
-  * ...
-
-* Đã tạo và cấu hình AWS Free Tier account thành công.
-
-* Làm quen với AWS Management Console và biết cách tìm, truy cập, sử dụng dịch vụ từ giao diện web.
-
-* Cài đặt và cấu hình AWS CLI trên máy tính bao gồm:
-  * Access Key
-  * Secret Key
-  * Region mặc định
-  * ...
-
-* Sử dụng AWS CLI để thực hiện các thao tác cơ bản như:
-
-  * Kiểm tra thông tin tài khoản & cấu hình
-  * Lấy danh sách region
-  * Xem dịch vụ EC2
-  * Tạo và quản lý key pair
-  * Kiểm tra thông tin dịch vụ đang chạy
-  * ...
-
-* Có khả năng kết nối giữa giao diện web và CLI để quản lý tài nguyên AWS song song.
-* ...
-
-
+- DNS và thay đổi chứng chỉ có thể mất thời gian để lan truyền; lên kế hoạch cho TTLs và xác thực các bản ghi trước khi cắt.
+- Trộn lẫn các nhà cung cấp (Route 53 + Cloudflare) yêu cầu cấu hình name server và SSL/TLS cẩn thận.
+- Thiết lập môi trường khác nhau giữa các hệ điều hành—ghi chép một đường dẫn thiết lập tối thiểu, có thể lặp lại cho các thành viên đội.
+- Khi khắc phục sự cố triển khai trên EC2, hãy bắt đầu với security groups, NACLs, và logs của instance.
