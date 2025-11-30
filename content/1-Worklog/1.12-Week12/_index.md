@@ -21,7 +21,7 @@ pre: " <b> 1.12. </b> "
 |-----|------|------------|-----------------|--------------------|
 | Mon | - Review all infrastructure components and dependencies <br> - Create comprehensive architecture documentation | 13/11/2025 | 16/11/2025 | — |
 | Tue | - Perform end-to-end application workflow testing <br> - Test all user journeys from login to data operations | 13/11/2025 | 16/11/2025 | — |
-| Wed | - Conduct load testing using Apache JMeter or similar tool <br> - Verify auto-scaling triggers and response | 13/11/2025 | 16/11/2025 | <a href="https://jmeter.apache.org/">Apache JMeter</a> |
+| Wed | - Weekly Scrum/Meeting: Progress report and team synchronization | 13/11/2025 | 16/11/2025 | — |
 | Thu | - Simulate RDS failover and verify application recovery <br> - Test ECS task termination and restart behavior | 13/11/2025 | 16/11/2025 | <a href="https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_UpgradeDBInstance.Maintenance.html">RDS Failover</a> |
 | Fri | - Document infrastructure costs and optimization recommendations <br> - Create runbooks for common operational tasks | 13/11/2025 | 16/11/2025 | — |
 | Sat | - Final review and cleanup <br> - Present project completion and lessons learned | 13/11/2025 | 16/11/2025 | — |

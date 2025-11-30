@@ -1,59 +1,38 @@
 ---
 title: "Worklog Tuần 5"
-date: "2025-01-01"
+date: "2025-10-05"
 weight: 1
 chapter: false
 pre: " <b> 1.5. </b> "
 ---
-{{% notice warning %}}
-⚠️ **Lưu ý:** Các thông tin dưới đây chỉ nhằm mục đích tham khảo, vui lòng **không sao chép nguyên văn** cho bài báo cáo của bạn kể cả warning này.
-{{% /notice %}}
 
+### Mục tiêu Tuần 5
 
-### Mục tiêu tuần 5:
+- Xây dựng và push Docker images lên Amazon ECR.
+- Triển khai ứng dụng containerized sử dụng ECS Fargate.
+- Tích hợp ECR với CodePipeline cho automated deployments.
 
-* Kết nối, làm quen với các thành viên trong First Cloud Journey.
-* Hiểu dịch vụ AWS cơ bản, cách dùng console & CLI.
+### Các công việc thực hiện trong tuần này
+| Ngày | Công việc | Ngày bắt đầu | Ngày hoàn thành | Tài liệu tham khảo |
+|-----|------|------------|-----------------|--------------------|
+| Thứ 2 | - Tạo ECR repositories cho application images <br> - Cấu hình IAM permissions cho ECR access | 25/09/2025 | 28/09/2025 | <a href="https://docs.aws.amazon.com/AmazonECR/latest/userguide/">Tài liệu ECR</a> |
+| Thứ 3 | - Weekly Scrum/Meeting: Báo cáo tiến độ và đồng bộ hóa với đội | 25/09/2025 | 28/09/2025 | — |
+| Thứ 4 | - Tạo ECS Fargate task definitions <br> - Cấu hình container environment variables và resource limits | 25/09/2025 | 28/09/2025 | <a href="https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definitions.html">Hướng dẫn Task Definitions</a> |
+| Thứ 5 | - Khởi chạy ECS services sử dụng Fargate launch type <br> - Gắn services tới load balancer được tạo ở Tuần 4 | 25/09/2025 | 28/09/2025 | <a href="https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs_services.html">Hướng dẫn ECS Services</a> |
+| Thứ 6 | - Kiểm tra automatic task scaling dựa trên CPU và memory <br> - Xác minh service availability thông qua load balancer | 25/09/2025 | 28/09/2025 | <a href="https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-auto-scaling.html">Hướng dẫn Auto Scaling</a> |
+| Thứ 7 | - Cập nhật image version trong ECR <br> - Kiểm tra rolling deployment để xác minh blue-green pattern | 25/09/2025 | 28/09/2025 | — |
 
-### Các công việc cần triển khai trong tuần này:
-| Thứ | Công việc                                                                                                                                                                                   | Ngày bắt đầu | Ngày hoàn thành | Nguồn tài liệu                            |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ | --------------- | ----------------------------------------- |
-| 2   | - Làm quen với các thành viên FCJ <br> - Đọc và lưu ý các nội quy, quy định tại đơn vị thực tập                                                                                             | 11/08/2025   | 11/08/2025      |
-| 3   | - Tìm hiểu AWS và các loại dịch vụ <br>&emsp; + Compute <br>&emsp; + Storage <br>&emsp; + Networking <br>&emsp; + Database <br>&emsp; + ... <br>                                            | 12/08/2025   | 12/08/2025      | <https://cloudjourney.awsstudygroup.com/> |
-| 4   | - Tạo AWS Free Tier account <br> - Tìm hiểu AWS Console & AWS CLI <br> - **Thực hành:** <br>&emsp; + Tạo AWS account <br>&emsp; + Cài AWS CLI & cấu hình <br> &emsp; + Cách sử dụng AWS CLI | 13/08/2025   | 13/08/2025      | <https://cloudjourney.awsstudygroup.com/> |
-| 5   | - Tìm hiểu EC2 cơ bản: <br>&emsp; + Instance types <br>&emsp; + AMI <br>&emsp; + EBS <br>&emsp; + ... <br> - Các cách remote SSH vào EC2 <br> - Tìm hiểu Elastic IP   <br>                  | 14/08/2025   | 15/08/2025      | <https://cloudjourney.awsstudygroup.com/> |
-| 6   | - **Thực hành:** <br>&emsp; + Tạo EC2 instance <br>&emsp; + Kết nối SSH <br>&emsp; + Gắn EBS volume                                                                                         | 15/08/2025   | 15/08/2025      | <https://cloudjourney.awsstudygroup.com/> |
+### Những thành tích của Tuần 5
 
+- Xây dựng và push thành công Docker images lên ECR repositories.
+- Tạo reusable ECS Fargate task definitions với proper resource allocation.
+- Triển khai containerized services và tích hợp với Application Load Balancer.
+- Cấu hình service auto-scaling policies cho CPU và memory metrics.
+- Kiểm tra rolling deployments mà không có service downtime.
+- Học best practices về image tagging cho version control và deployment.
 
-### Kết quả đạt được tuần 5:
+### Những thách thức và bài học
 
-* Hiểu AWS là gì và nắm được các nhóm dịch vụ cơ bản: 
-  * Compute
-  * Storage
-  * Networking 
-  * Database
-  * ...
-
-* Đã tạo và cấu hình AWS Free Tier account thành công.
-
-* Làm quen với AWS Management Console và biết cách tìm, truy cập, sử dụng dịch vụ từ giao diện web.
-
-* Cài đặt và cấu hình AWS CLI trên máy tính bao gồm:
-  * Access Key
-  * Secret Key
-  * Region mặc định
-  * ...
-
-* Sử dụng AWS CLI để thực hiện các thao tác cơ bản như:
-
-  * Kiểm tra thông tin tài khoản & cấu hình
-  * Lấy danh sách region
-  * Xem dịch vụ EC2
-  * Tạo và quản lý key pair
-  * Kiểm tra thông tin dịch vụ đang chạy
-  * ...
-
-* Có khả năng kết nối giữa giao diện web và CLI để quản lý tài nguyên AWS song song.
-* ...
-
-
+- ECR repository permissions phải được cấu hình chính xác cho push/pull operations.
+- Task definition compatibility giữa local Docker và Fargate runtime yêu cầu chú ý tới base images.
+- Service updates có thể tốn thời gian; cân nhắc sử dụng service deployment configuration parameters.

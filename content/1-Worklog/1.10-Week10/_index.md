@@ -21,7 +21,7 @@ pre: " <b> 1.10. </b> "
 |-----|------|------------|-----------------|--------------------|
 | Mon | - Review S3 bucket structure and storage classes <br> - Plan lifecycle policies for cost optimization | 30/10/2025 | 02/11/2025 | <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/">S3 Documentation</a> |
 | Tue | - Create S3 lifecycle rules for transitioning objects <br> - Configure versioning and MFA delete protection | 30/10/2025 | 02/11/2025 | <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lifecycle-mgmt.html">Lifecycle Management</a> |
-| Wed | - Enable server-side encryption (SSE-S3) for all objects <br> - Configure bucket policies for access control | 30/10/2025 | 02/11/2025 | <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/security.html">S3 Security</a> |
+| Wed | - Weekly Scrum/Meeting: Progress report and team synchronization | 30/10/2025 | 02/11/2025 | — |
 | Thu | - Enable S3 access logging and configure CloudTrail for audit <br> - Set up bucket inventory for analysis | 30/10/2025 | 02/11/2025 | <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/ServerLogs.html">Logging Guide</a> |
 | Fri | - Implement presigned URLs for temporary object access <br> - Test access control and permissions | 30/10/2025 | 02/11/2025 | <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/PresignedUrlUploadObject.html">Presigned URLs</a> |
 | Sat | - Estimate cost savings from lifecycle policies <br> - Document S3 bucket configuration and access patterns | 30/10/2025 | 02/11/2025 | — |

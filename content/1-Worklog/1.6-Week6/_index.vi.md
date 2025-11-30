@@ -1,58 +1,38 @@
 ---
 title: "Worklog Tuần 6"
-date: "2025-01-01"
+date: "2025-10-12"
 weight: 1
 chapter: false
 pre: " <b> 1.6. </b> "
 ---
-{{% notice warning %}}
-⚠️ **Lưu ý:** Các thông tin dưới đây chỉ nhằm mục đích tham khảo, vui lòng **không sao chép nguyên văn** cho bài báo cáo của bạn kể cả warning này.
-{{% /notice %}}
 
+### Mục tiêu Tuần 6
 
-### Mục tiêu tuần 6:
+- Thiết lập continuous integration và deployment (CI/CD) pipeline sử dụng AWS CodePipeline.
+- Tích hợp GitHub repository với CodePipeline cho automated deployments.
+- Triển khai automated testing trong pipeline.
 
-* Kết nối, làm quen với các thành viên trong First Cloud Journey.
-* Hiểu dịch vụ AWS cơ bản, cách dùng console & CLI.
+### Các công việc thực hiện trong tuần này
+| Ngày | Công việc | Ngày bắt đầu | Ngày hoàn thành | Tài liệu tham khảo |
+|-----|------|------------|-----------------|--------------------|
+| Thứ 2 | - Tạo CodePipeline project <br> - Cấu hình GitHub source connection và credentials | 02/10/2025 | 05/10/2025 | <a href="https://docs.aws.amazon.com/codepipeline/latest/userguide/">Tài liệu CodePipeline</a> |
+| Thứ 3 | - Weekly Scrum/Meeting: Báo cáo tiến độ và đồng bộ hóa với đội | 02/10/2025 | 05/10/2025 | — |
+| Thứ 4 | - Cấu hình ECR làm deployment target <br> - Tạo deployment stage trong CodePipeline | 02/10/2025 | 05/10/2025 | <a href="https://docs.aws.amazon.com/codepipeline/latest/userguide/integrations.html">CodePipeline Integrations</a> |
+| Thứ 5 | - Thêm manual approval step trước production deployment <br> - Kiểm tra pipeline execution với code commits | 02/10/2025 | 05/10/2025 | <a href="https://docs.aws.amazon.com/codepipeline/latest/userguide/concepts.html">CodePipeline Concepts</a> |
+| Thứ 6 | - Thêm CloudWatch notifications cho pipeline events <br> - Tài liệu hóa pipeline stages và workflow | 02/10/2025 | 05/10/2025 | <a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/">CloudWatch Events Guide</a> |
+| Thứ 7 | - Kiểm tra end-to-end deployment flow <br> - Xác minh ECR image updates và ECS service deployment | 02/10/2025 | 05/10/2025 | — |
 
-### Các công việc cần triển khai trong tuần này:
-| Thứ | Công việc                                                                                                                                                                                   | Ngày bắt đầu | Ngày hoàn thành | Nguồn tài liệu                            |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ | --------------- | ----------------------------------------- |
-| 2   | - Làm quen với các thành viên FCJ <br> - Đọc và lưu ý các nội quy, quy định tại đơn vị thực tập                                                                                             | 11/08/2025   | 11/08/2025      |
-| 3   | - Tìm hiểu AWS và các loại dịch vụ <br>&emsp; + Compute <br>&emsp; + Storage <br>&emsp; + Networking <br>&emsp; + Database <br>&emsp; + ... <br>                                            | 12/08/2025   | 12/08/2025      | <https://cloudjourney.awsstudygroup.com/> |
-| 4   | - Tạo AWS Free Tier account <br> - Tìm hiểu AWS Console & AWS CLI <br> - **Thực hành:** <br>&emsp; + Tạo AWS account <br>&emsp; + Cài AWS CLI & cấu hình <br> &emsp; + Cách sử dụng AWS CLI | 13/08/2025   | 13/08/2025      | <https://cloudjourney.awsstudygroup.com/> |
-| 5   | - Tìm hiểu EC2 cơ bản: <br>&emsp; + Instance types <br>&emsp; + AMI <br>&emsp; + EBS <br>&emsp; + ... <br> - Các cách remote SSH vào EC2 <br> - Tìm hiểu Elastic IP   <br>                  | 14/08/2025   | 15/08/2025      | <https://cloudjourney.awsstudygroup.com/> |
-| 6   | - **Thực hành:** <br>&emsp; + Tạo EC2 instance <br>&emsp; + Kết nối SSH <br>&emsp; + Gắn EBS volume                                                                                         | 15/08/2025   | 15/08/2025      | <https://cloudjourney.awsstudygroup.com/> |
+### Những thành tích của Tuần 6
 
+- Tạo thành công CI/CD pipeline hoạt động từ GitHub tới ECS.
+- Automated Docker image building và ECR push qua CodeBuild.
+- Triển khai manual approval gates cho production deployments.
+- Thiết lập CloudWatch notifications cho pipeline state changes.
+- Giảm manual deployment steps từ 8+ steps xuống 1 git push.
+- Học best practices cho pipeline về failure handling và rollback scenarios.
 
-### Kết quả đạt được tuần 6:
-* Hiểu AWS là gì và nắm được các nhóm dịch vụ cơ bản: 
-  * Compute
-  * Storage
-  * Networking 
-  * Database
-  * ...
+### Những thách thức và bài học
 
-* Đã tạo và cấu hình AWS Free Tier account thành công.
-
-* Làm quen với AWS Management Console và biết cách tìm, truy cập, sử dụng dịch vụ từ giao diện web.
-
-* Cài đặt và cấu hình AWS CLI trên máy tính bao gồm:
-  * Access Key
-  * Secret Key
-  * Region mặc định
-  * ...
-
-* Sử dụng AWS CLI để thực hiện các thao tác cơ bản như:
-
-  * Kiểm tra thông tin tài khoản & cấu hình
-  * Lấy danh sách region
-  * Xem dịch vụ EC2
-  * Tạo và quản lý key pair
-  * Kiểm tra thông tin dịch vụ đang chạy
-  * ...
-
-* Có khả năng kết nối giữa giao diện web và CLI để quản lý tài nguyên AWS song song.
-* ...
-
-
+- GitHub token authentication yêu cầu proper IAM policies cho CodePipeline.
+- CodeBuild environment variables phải bao gồm AWS credentials cho ECR push operations.
+- Pipeline failures có thể khó hiểu; CloudWatch logs là cần thiết cho debugging.

@@ -21,7 +21,7 @@ pre: " <b> 1.4. </b> "
 |-----|------|------------|-----------------|--------------------|
 | Mon | - Review Docker concepts and container images <br> - Learn ECS task definitions and clusters | 18/09/2025 | 21/09/2025 | <a href="https://docs.aws.amazon.com/AmazonECS/latest/developerguide/">ECS Documentation</a> |
 | Tue | - Create a VPC with public and private subnets <br> - Configure security groups and NACLs | 18/09/2025 | 21/09/2025 | <a href="https://docs.aws.amazon.com/vpc/">VPC Documentation</a> |
-| Wed | - Set up an Application Load Balancer (ALB) <br> - Configure target groups for EC2 instances | 18/09/2025 | 21/09/2025 | <a href="https://docs.aws.amazon.com/elasticloadbalancing/">ELB Documentation</a> |
+| Wed | - Weekly Scrum/Meeting: Progress report and team synchronization | 18/09/2025 | 21/09/2025 | — |
 | Thu | - Launch multiple EC2 instances in the VPC <br> - Register instances with load balancer | 18/09/2025 | 21/09/2025 | <a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/">EC2 User Guide</a> |
 | Fri | - Test load balancing across instances <br> - Monitor health checks and traffic distribution | 18/09/2025 | 21/09/2025 | <a href="https://docs.aws.amazon.com/elasticloadbalancing/latest/application/">ALB User Guide</a> |
 | Sat | - Document VPC architecture <br> - Optimize security group rules | 18/09/2025 | 21/09/2025 | — |

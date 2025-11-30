@@ -1,59 +1,38 @@
 ---
 title: "Worklog Tuần 8"
-date: "2025-01-01"
+date: "2025-10-26"
 weight: 1
 chapter: false
 pre: " <b> 1.8. </b> "
 ---
-{{% notice warning %}}
-⚠️ **Lưu ý:** Các thông tin dưới đây chỉ nhằm mục đích tham khảo, vui lòng **không sao chép nguyên văn** cho bài báo cáo của bạn kể cả warning này.
-{{% /notice %}}
 
+### Mục tiêu Tuần 8
 
-### Mục tiêu tuần 8:
+- Thiết lập RDS cho managed relational database services.
+- Triển khai basic backup và recovery strategies.
+- Cấu hình security groups cho database access từ ECS services.
 
-* Kết nối, làm quen với các thành viên trong First Cloud Journey.
-* Hiểu dịch vụ AWS cơ bản, cách dùng console & CLI.
+### Các công việc thực hiện trong tuần này
+| Ngày | Công việc | Ngày bắt đầu | Ngày hoàn thành | Tài liệu tham khảo |
+|-----|------|------------|-----------------|--------------------|
+| Thứ 2 | - Tạo RDS database instance (PostgreSQL/MySQL) <br> - Cấu hình multi-AZ deployment cho high availability | 16/10/2025 | 19/10/2025 | <a href="https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/">Tài liệu RDS</a> |
+| Thứ 3 | - Weekly Scrum/Meeting: Báo cáo tiến độ và đồng bộ hóa với đội | 16/10/2025 | 19/10/2025 | — |
+| Thứ 4 | - Tạo initial database schema và tables <br> - Thiết lập automated backups và retention policies | 16/10/2025 | 19/10/2025 | <a href="https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithBackups.html">Hướng dẫn RDS Backups</a> |
+| Thứ 5 | - Bật Enhanced Monitoring cho RDS instance <br> - Cấu hình database parameter groups cho optimization | 16/10/2025 | 19/10/2025 | <a href="https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/MonitoringOverview.html">Theo dõi RDS</a> |
+| Thứ 6 | - Cập nhật application connection strings trong ECS tasks <br> - Kiểm tra database operations từ containerized application | 16/10/2025 | 19/10/2025 | <a href="https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_ConnectToInstance.html">Kết nối RDS</a> |
+| Thứ 7 | - Thực hiện backup và restore test <br> - Tài liệu hóa database configuration và credentials management | 16/10/2025 | 19/10/2025 | — |
 
-### Các công việc cần triển khai trong tuần này:
-| Thứ | Công việc                                                                                                                                                                                   | Ngày bắt đầu | Ngày hoàn thành | Nguồn tài liệu                            |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ | --------------- | ----------------------------------------- |
-| 2   | - Làm quen với các thành viên FCJ <br> - Đọc và lưu ý các nội quy, quy định tại đơn vị thực tập                                                                                             | 11/08/2025   | 11/08/2025      |
-| 3   | - Tìm hiểu AWS và các loại dịch vụ <br>&emsp; + Compute <br>&emsp; + Storage <br>&emsp; + Networking <br>&emsp; + Database <br>&emsp; + ... <br>                                            | 12/08/2025   | 12/08/2025      | <https://cloudjourney.awsstudygroup.com/> |
-| 4   | - Tạo AWS Free Tier account <br> - Tìm hiểu AWS Console & AWS CLI <br> - **Thực hành:** <br>&emsp; + Tạo AWS account <br>&emsp; + Cài AWS CLI & cấu hình <br> &emsp; + Cách sử dụng AWS CLI | 13/08/2025   | 13/08/2025      | <https://cloudjourney.awsstudygroup.com/> |
-| 5   | - Tìm hiểu EC2 cơ bản: <br>&emsp; + Instance types <br>&emsp; + AMI <br>&emsp; + EBS <br>&emsp; + ... <br> - Các cách remote SSH vào EC2 <br> - Tìm hiểu Elastic IP   <br>                  | 14/08/2025   | 15/08/2025      | <https://cloudjourney.awsstudygroup.com/> |
-| 6   | - **Thực hành:** <br>&emsp; + Tạo EC2 instance <br>&emsp; + Kết nối SSH <br>&emsp; + Gắn EBS volume                                                                                         | 15/08/2025   | 15/08/2025      | <https://cloudjourney.awsstudygroup.com/> |
+### Những thành tích của Tuần 8
 
+- Cấp phát thành công multi-AZ RDS instance với automatic failover.
+- Cấu hình proper security group ingress rules cho application access.
+- Triển khai automated daily backups với 7-day retention.
+- Xác minh application connectivity tới RDS database.
+- Thiết lập Enhanced Monitoring để theo dõi database performance metrics.
+- Học RDS parameter group customization và performance tuning basics.
 
-### Kết quả đạt được tuần 8:
+### Những thách thức và bài học
 
-* Hiểu AWS là gì và nắm được các nhóm dịch vụ cơ bản: 
-  * Compute
-  * Storage
-  * Networking 
-  * Database
-  * ...
-
-* Đã tạo và cấu hình AWS Free Tier account thành công.
-
-* Làm quen với AWS Management Console và biết cách tìm, truy cập, sử dụng dịch vụ từ giao diện web.
-
-* Cài đặt và cấu hình AWS CLI trên máy tính bao gồm:
-  * Access Key
-  * Secret Key
-  * Region mặc định
-  * ...
-
-* Sử dụng AWS CLI để thực hiện các thao tác cơ bản như:
-
-  * Kiểm tra thông tin tài khoản & cấu hình
-  * Lấy danh sách region
-  * Xem dịch vụ EC2
-  * Tạo và quản lý key pair
-  * Kiểm tra thông tin dịch vụ đang chạy
-  * ...
-
-* Có khả năng kết nối giữa giao diện web và CLI để quản lý tài nguyên AWS song song.
-* ...
-
-
+- Database parameter changes có thể yêu cầu instance reboots; lập kế hoạch maintenance windows cẩn thận.
+- Multi-AZ deployments gấp đôi chi phí; đánh giá nhu cầu trước khi bật.
+- Application connection pooling là quan trọng để tránh exhausting available connections.

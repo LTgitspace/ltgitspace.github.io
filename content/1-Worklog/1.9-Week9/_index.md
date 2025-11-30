@@ -21,7 +21,7 @@ pre: " <b> 1.9. </b> "
 |-----|------|------------|-----------------|--------------------|
 | Mon | - Create DynamoDB tables for application data <br> - Define primary keys and attributes | 23/10/2025 | 26/10/2025 | <a href="https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/">DynamoDB Documentation</a> |
 | Tue | - Configure Global Secondary Indexes (GSI) for query flexibility <br> - Set up TTL for session data expiration | 23/10/2025 | 26/10/2025 | <a href="https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.CoreComponents.html">DynamoDB Core Concepts</a> |
-| Wed | - Configure on-demand billing mode vs provisioned capacity <br> - Monitor DynamoDB throttling and capacity | 23/10/2025 | 26/10/2025 | <a href="https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/BillingMode.html">Billing Mode Guide</a> |
+| Wed | - Weekly Scrum/Meeting: Progress report and team synchronization | 23/10/2025 | 26/10/2025 | — |
 | Thu | - Update application code to integrate DynamoDB operations <br> - Implement session storage using DynamoDB | 23/10/2025 | 26/10/2025 | <a href="https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Query.html">Query Operations</a> |
 | Fri | - Test CRUD operations (Create, Read, Update, Delete) <br> - Load test to verify performance under concurrent requests | 23/10/2025 | 26/10/2025 | <a href="https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/best-practices.html">Best Practices</a> |
 | Sat | - Enable point-in-time recovery <br> - Monitor and optimize query patterns | 23/10/2025 | 26/10/2025 | — |

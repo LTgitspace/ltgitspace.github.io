@@ -16,7 +16,7 @@ pre: " <b> 1.3. </b> "
 |------|-------------------------------------------------------------------------------------------------------|--------------|-----------|------------|
 | Mon  | Initialize Angular project. <br> add self-signed cert <br> document HTTPS setup.                      | 2025-09-09   | 2025-09-09 |  |
 | Tue  | Configure AWS Cognito user pool<br> implement login/logout & route guards<br> token refresh handling. | 2025-09-10   | 2025-09-10 |  |
-| Wed  | Build S3 service with presigned URL upload/download<br> add retry + error notifications.              | 2025-09-11   | 2025-09-11 |  |
+| Wed  | - Weekly Scrum/Meeting: Progress report and team synchronization | 2025-09-11   | 2025-09-11 |  |
 | Thu  | Create Lambda + API Gateway endpoints                                                                 | 2025-09-12   | 2025-09-12 |  |
 | Fri  | Work on proposal                                                                                      | 2025-09-13   | 2025-09-13 |  |
 | Sat  | Work on proposal                                                                                      | 2025-09-14   | 2025-09-14 |  |

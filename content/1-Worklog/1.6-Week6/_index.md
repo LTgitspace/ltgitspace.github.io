@@ -21,7 +21,7 @@ pre: " <b> 1.6. </b> "
 |-----|------|------------|-----------------|--------------------|
 | Mon | - Create a CodePipeline project <br> - Configure GitHub source connection and credentials | 02/10/2025 | 05/10/2025 | <a href="https://docs.aws.amazon.com/codepipeline/latest/userguide/">CodePipeline Documentation</a> |
 | Tue | - Set up CodeBuild project for automated Docker image building <br> - Create buildspec.yml for build process | 02/10/2025 | 05/10/2025 | <a href="https://docs.aws.amazon.com/codebuild/latest/userguide/">CodeBuild Documentation</a> |
-| Wed | - Configure ECR as deployment target <br> - Create deployment stage in CodePipeline | 02/10/2025 | 05/10/2025 | <a href="https://docs.aws.amazon.com/codepipeline/latest/userguide/integrations.html">CodePipeline Integrations</a> |
+| Wed | - Weekly Scrum/Meeting: Progress report and team synchronization | 02/10/2025 | 05/10/2025 | — |
 | Thu | - Add manual approval step before production deployment <br> - Test pipeline execution with code commits | 02/10/2025 | 05/10/2025 | <a href="https://docs.aws.amazon.com/codepipeline/latest/userguide/concepts.html">CodePipeline Concepts</a> |
 | Fri | - Add CloudWatch notifications for pipeline events <br> - Document the pipeline stages and workflow | 02/10/2025 | 05/10/2025 | <a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/">CloudWatch Events Guide</a> |
 | Sat | - Test end-to-end deployment flow <br> - Verify ECR image updates and ECS service deployment | 02/10/2025 | 05/10/2025 | — |

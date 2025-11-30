@@ -1,59 +1,38 @@
 ---
 title: "Worklog Tuần 4"
-date: "2025-01-01"
+date: "2025-09-28"
 weight: 1
 chapter: false
 pre: " <b> 1.4. </b> "
 ---
-{{% notice warning %}}
-⚠️ **Lưu ý:** Các thông tin dưới đây chỉ nhằm mục đích tham khảo, vui lòng **không sao chép nguyên văn** cho bài báo cáo của bạn kể cả warning này.
-{{% /notice %}}
 
+### Mục tiêu Tuần 4
 
-### Mục tiêu tuần 4:
+- Tìm hiểu sâu về containerization với Docker và những kiến thức cơ bản về ECS.
+- Thiết lập VPC cơ bản với cấu hình networking thích hợp.
+- Khám phá Elastic Load Balancer (ELB) cho phân phối traffic.
 
-* Kết nối, làm quen với các thành viên trong First Cloud Journey.
-* Hiểu dịch vụ AWS cơ bản, cách dùng console & CLI.
+### Các công việc thực hiện trong tuần này
+| Ngày | Công việc | Ngày bắt đầu | Ngày hoàn thành | Tài liệu tham khảo |
+|-----|------|------------|-----------------|--------------------|
+| Thứ 2 | - Xem xét các khái niệm Docker và container images <br> - Học ECS task definitions và clusters | 18/09/2025 | 21/09/2025 | <a href="https://docs.aws.amazon.com/AmazonECS/latest/developerguide/">Tài liệu ECS</a> |
+| Thứ 3 | - Weekly Scrum/Meeting: Báo cáo tiến độ và đồng bộ hóa với đội | 18/09/2025 | 21/09/2025 | — |
+| Thứ 4 | - Thiết lập Application Load Balancer (ALB) <br> - Cấu hình target groups cho EC2 instances | 18/09/2025 | 21/09/2025 | <a href="https://docs.aws.amazon.com/elasticloadbalancing/">Tài liệu ELB</a> |
+| Thứ 5 | - Khởi chạy nhiều EC2 instances trong VPC <br> - Đăng ký instances với load balancer | 18/09/2025 | 21/09/2025 | <a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/">Hướng dẫn người dùng EC2</a> |
+| Thứ 6 | - Kiểm tra load balancing trên các instances <br> - Theo dõi health checks và phân phối traffic | 18/09/2025 | 21/09/2025 | <a href="https://docs.aws.amazon.com/elasticloadbalancing/latest/application/">Hướng dẫn ALB</a> |
+| Thứ 7 | - Tài liệu hóa kiến trúc VPC <br> - Tối ưu hóa security group rules | 18/09/2025 | 21/09/2025 | — |
 
-### Các công việc cần triển khai trong tuần này:
-| Thứ | Công việc                                                                                                                                                                                   | Ngày bắt đầu | Ngày hoàn thành | Nguồn tài liệu                            |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ | --------------- | ----------------------------------------- |
-| 2   | - Làm quen với các thành viên FCJ <br> - Đọc và lưu ý các nội quy, quy định tại đơn vị thực tập                                                                                             | 11/08/2025   | 11/08/2025      |
-| 3   | - Tìm hiểu AWS và các loại dịch vụ <br>&emsp; + Compute <br>&emsp; + Storage <br>&emsp; + Networking <br>&emsp; + Database <br>&emsp; + ... <br>                                            | 12/08/2025   | 12/08/2025      | <https://cloudjourney.awsstudygroup.com/> |
-| 4   | - Tạo AWS Free Tier account <br> - Tìm hiểu AWS Console & AWS CLI <br> - **Thực hành:** <br>&emsp; + Tạo AWS account <br>&emsp; + Cài AWS CLI & cấu hình <br> &emsp; + Cách sử dụng AWS CLI | 13/08/2025   | 13/08/2025      | <https://cloudjourney.awsstudygroup.com/> |
-| 5   | - Tìm hiểu EC2 cơ bản: <br>&emsp; + Instance types <br>&emsp; + AMI <br>&emsp; + EBS <br>&emsp; + ... <br> - Các cách remote SSH vào EC2 <br> - Tìm hiểu Elastic IP   <br>                  | 14/08/2025   | 15/08/2025      | <https://cloudjourney.awsstudygroup.com/> |
-| 6   | - **Thực hành:** <br>&emsp; + Tạo EC2 instance <br>&emsp; + Kết nối SSH <br>&emsp; + Gắn EBS volume                                                                                         | 15/08/2025   | 15/08/2025      | <https://cloudjourney.awsstudygroup.com/> |
+### Những thành tích của Tuần 4
 
+- Tạo thành công VPC với phân chia subnet thích hợp và lập kế hoạch CIDR.
+- Cấu hình security groups với inbound và outbound rules theo nguyên tắc least-privilege.
+- Thiết lập Application Load Balancer và đăng ký EC2 instances làm targets.
+- Xác minh functionality của health checks và load balancing trên nhiều instances.
+- Học những khác biệt chính giữa security groups và NACLs và các trường hợp sử dụng của chúng.
+- Kiểm tra hành vi failover khi instances không healthy.
 
-### Kết quả đạt được tuần 4:
+### Những thách thức và bài học
 
-* Hiểu AWS là gì và nắm được các nhóm dịch vụ cơ bản: 
-  * Compute
-  * Storage
-  * Networking 
-  * Database
-  * ...
-
-* Đã tạo và cấu hình AWS Free Tier account thành công.
-
-* Làm quen với AWS Management Console và biết cách tìm, truy cập, sử dụng dịch vụ từ giao diện web.
-
-* Cài đặt và cấu hình AWS CLI trên máy tính bao gồm:
-  * Access Key
-  * Secret Key
-  * Region mặc định
-  * ...
-
-* Sử dụng AWS CLI để thực hiện các thao tác cơ bản như:
-
-  * Kiểm tra thông tin tài khoản & cấu hình
-  * Lấy danh sách region
-  * Xem dịch vụ EC2
-  * Tạo và quản lý key pair
-  * Kiểm tra thông tin dịch vụ đang chạy
-  * ...
-
-* Có khả năng kết nối giữa giao diện web và CLI để quản lý tài nguyên AWS song song.
-* ...
-
-
+- CIDR block conflicts yêu cầu lập kế hoạch cẩn thận; overlapping subnets có thể gây ra routing issues.
+- Cấu hình health check trực tiếp ảnh hưởng tới tính khả dụng của instance trong load balancer.
+- Security group rules phải cho phép ALB traffic trên các port và protocol chính xác.

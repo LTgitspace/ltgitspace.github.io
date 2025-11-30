@@ -21,7 +21,7 @@ pre: " <b> 1.11. </b> "
 |-----|------|------------|-----------------|--------------------|
 | Mon | - Create CloudWatch dashboards for key metrics <br> - Set up custom metrics from application logs | 06/11/2025 | 09/11/2025 | <a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/">CloudWatch Documentation</a> |
 | Tue | - Configure CloudWatch alarms for CPU, memory, and network <br> - Set up SNS topics for alarm notifications | 06/11/2025 | 09/11/2025 | <a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/">Events Guide</a> |
-| Wed | - Enable detailed CloudWatch logs for ECS tasks <br> - Create log groups and configure retention policies | 06/11/2025 | 09/11/2025 | <a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/">Logs Guide</a> |
+| Wed | - Weekly Scrum/Meeting: Progress report and team synchronization | 06/11/2025 | 09/11/2025 | — |
 | Thu | - Set up CloudWatch Insights for log analysis <br> - Create queries for common troubleshooting scenarios | 06/11/2025 | 09/11/2025 | <a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/AnalyzingLogData.html">CloudWatch Insights</a> |
 | Fri | - Configure application to send custom metrics to CloudWatch <br> - Test alarm triggering and notification flow | 06/11/2025 | 09/11/2025 | <a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/working_with_metrics.html">Metrics Guide</a> |
 | Sat | - Review and optimize dashboard layout <br> - Document monitoring architecture and alert thresholds | 06/11/2025 | 09/11/2025 | — |

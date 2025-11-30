@@ -21,7 +21,7 @@ pre: " <b> 1.8. </b> "
 |-----|------|------------|-----------------|--------------------|
 | Mon | - Create an RDS database instance (PostgreSQL/MySQL) <br> - Configure multi-AZ deployment for high availability | 16/10/2025 | 19/10/2025 | <a href="https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/">RDS Documentation</a> |
 | Tue | - Configure database security group to allow access from ECS <br> - Test database connectivity from EC2 bastion host | 16/10/2025 | 19/10/2025 | <a href="https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_GettingStarted.html">Getting Started with RDS</a> |
-| Wed | - Create initial database schema and tables <br> - Set up automated backups and retention policies | 16/10/2025 | 19/10/2025 | <a href="https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithBackups.html">RDS Backups Guide</a> |
+| Wed | - Weekly Scrum/Meeting: Progress report and team synchronization | 16/10/2025 | 19/10/2025 | — |
 | Thu | - Enable Enhanced Monitoring for RDS instance <br> - Configure database parameter groups for optimization | 16/10/2025 | 19/10/2025 | <a href="https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/MonitoringOverview.html">Monitoring RDS</a> |
 | Fri | - Update application connection strings in ECS tasks <br> - Test database operations from containerized application | 16/10/2025 | 19/10/2025 | <a href="https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_ConnectToInstance.html">Connecting to RDS</a> |
 | Sat | - Perform backup and restore test <br> - Document database configuration and credentials management | 16/10/2025 | 19/10/2025 | — |

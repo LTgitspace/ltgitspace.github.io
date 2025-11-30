@@ -1,59 +1,38 @@
 ---
 title: "Worklog Tuần 10"
-date: "2025-01-01"
+date: "2025-11-09"
 weight: 2
 chapter: false
 pre: " <b> 1.10. </b> "
 ---
-{{% notice warning %}}
-⚠️ **Lưu ý:** Các thông tin dưới đây chỉ nhằm mục đích tham khảo, vui lòng **không sao chép nguyên văn** cho bài báo cáo của bạn kể cả warning này.
-{{% /notice %}}
 
+### Mục tiêu Tuần 10
 
-### Mục tiêu tuần 10:
+- Tối ưu hóa S3 storage và triển khai lifecycle policies.
+- Cấu hình S3 cho static website hosting với CloudFront.
+- Triển khai data encryption và access controls cho S3 buckets.
 
-* Kết nối, làm quen với các thành viên trong First Cloud Journey.
-* Hiểu dịch vụ AWS cơ bản, cách dùng console & CLI.
+### Các công việc thực hiện trong tuần này
+| Ngày | Công việc | Ngày bắt đầu | Ngày hoàn thành | Tài liệu tham khảo |
+|-----|------|------------|-----------------|--------------------|
+| Thứ 2 | - Xem xét S3 bucket structure và storage classes <br> - Lập kế hoạch lifecycle policies cho cost optimization | 30/10/2025 | 02/11/2025 | <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/">Tài liệu S3</a> |
+| Thứ 3 | - Weekly Scrum/Meeting: Báo cáo tiến độ và đồng bộ hóa với đội | 30/10/2025 | 02/11/2025 | — |
+| Thứ 4 | - Bật server-side encryption (SSE-S3) cho tất cả objects <br> - Cấu hình bucket policies cho access control | 30/10/2025 | 02/11/2025 | <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/security.html">S3 Security</a> |
+| Thứ 5 | - Bật S3 access logging và cấu hình CloudTrail cho audit <br> - Thiết lập bucket inventory cho analysis | 30/10/2025 | 02/11/2025 | <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/ServerLogs.html">Logging Guide</a> |
+| Thứ 6 | - Triển khai presigned URLs cho temporary object access <br> - Kiểm tra access control và permissions | 30/10/2025 | 02/11/2025 | <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/PresignedUrlUploadObject.html">Presigned URLs</a> |
+| Thứ 7 | - Ước tính cost savings từ lifecycle policies <br> - Tài liệu hóa S3 bucket configuration và access patterns | 30/10/2025 | 02/11/2025 | — |
 
-### Các công việc cần triển khai trong tuần này:
-| Thứ | Công việc                                                                                                                                                                                   | Ngày bắt đầu | Ngày hoàn thành | Nguồn tài liệu                            |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ | --------------- | ----------------------------------------- |
-| 2   | - Làm quen với các thành viên FCJ <br> - Đọc và lưu ý các nội quy, quy định tại đơn vị thực tập                                                                                             | 11/08/2025   | 11/08/2025      |
-| 3   | - Tìm hiểu AWS và các loại dịch vụ <br>&emsp; + Compute <br>&emsp; + Storage <br>&emsp; + Networking <br>&emsp; + Database <br>&emsp; + ... <br>                                            | 12/08/2025   | 12/08/2025      | <https://cloudjourney.awsstudygroup.com/> |
-| 4   | - Tạo AWS Free Tier account <br> - Tìm hiểu AWS Console & AWS CLI <br> - **Thực hành:** <br>&emsp; + Tạo AWS account <br>&emsp; + Cài AWS CLI & cấu hình <br> &emsp; + Cách sử dụng AWS CLI | 13/08/2025   | 13/08/2025      | <https://cloudjourney.awsstudygroup.com/> |
-| 5   | - Tìm hiểu EC2 cơ bản: <br>&emsp; + Instance types <br>&emsp; + AMI <br>&emsp; + EBS <br>&emsp; + ... <br> - Các cách remote SSH vào EC2 <br> - Tìm hiểu Elastic IP   <br>                  | 14/08/2025   | 15/08/2025      | <https://cloudjourney.awsstudygroup.com/> |
-| 6   | - **Thực hành:** <br>&emsp; + Tạo EC2 instance <br>&emsp; + Kết nối SSH <br>&emsp; + Gắn EBS volume                                                                                         | 15/08/2025   | 15/08/2025      | <https://cloudjourney.awsstudygroup.com/> |
+### Những thành tích của Tuần 10
 
+- Triển khai S3 lifecycle policies để chuyển old objects tới Glacier storage.
+- Cấu hình bucket encryption và access logging cho compliance.
+- Thiết lập presigned URLs cho secure, time-limited object access.
+- Bật versioning và bucket inventory cho data management.
+- Tính toán potential 40% cost reduction thông qua storage class optimization.
+- Học S3 bucket policies, IAM roles, và access control strategies.
 
-### Kết quả đạt được tuần 10:
+### Những thách thức và bài học
 
-* Hiểu AWS là gì và nắm được các nhóm dịch vụ cơ bản: 
-  * Compute
-  * Storage
-  * Networking 
-  * Database
-  * ...
-
-* Đã tạo và cấu hình AWS Free Tier account thành công.
-
-* Làm quen với AWS Management Console và biết cách tìm, truy cập, sử dụng dịch vụ từ giao diện web.
-
-* Cài đặt và cấu hình AWS CLI trên máy tính bao gồm:
-  * Access Key
-  * Secret Key
-  * Region mặc định
-  * ...
-
-* Sử dụng AWS CLI để thực hiện các thao tác cơ bản như:
-
-  * Kiểm tra thông tin tài khoản & cấu hình
-  * Lấy danh sách region
-  * Xem dịch vụ EC2
-  * Tạo và quản lý key pair
-  * Kiểm tra thông tin dịch vụ đang chạy
-  * ...
-
-* Có khả năng kết nối giữa giao diện web và CLI để quản lý tài nguyên AWS song song.
-* ...
-
-
+- Lifecycle transitions có minimum object age requirements; lập kế hoạch tương ứng.
+- Presigned URL generation yêu cầu proper IAM permissions cho generating role.
+- Bật versioning tăng storage costs do retained object versions.

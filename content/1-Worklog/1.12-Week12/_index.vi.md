@@ -1,58 +1,50 @@
 ---
 title: "Worklog Tuần 12"
-date: "2025-01-01"
+date: "2025-11-23"
 weight: 2
 chapter: false
-pre: " <b> 1.12 </b> "
+pre: " <b> 1.12. </b> "
 ---
-{{% notice warning %}}
-⚠️ **Lưu ý:** Các thông tin dưới đây chỉ nhằm mục đích tham khảo, vui lòng **không sao chép nguyên văn** cho bài báo cáo của bạn kể cả warning này.
-{{% /notice %}}
 
-### Mục tiêu tuần 12:
+### Mục tiêu Tuần 12
 
-* Kết nối, làm quen với các thành viên trong First Cloud Journey.
-* Hiểu dịch vụ AWS cơ bản, cách dùng console & CLI.
+- Tiến hành end-to-end testing của complete infrastructure.
+- Thực hiện disaster recovery và failover testing.
+- Tài liệu hóa entire deployment và finalize dự án.
 
-### Các công việc cần triển khai trong tuần này:
-| Thứ | Công việc                                                                                                                                                                                   | Ngày bắt đầu | Ngày hoàn thành | Nguồn tài liệu                            |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ | --------------- | ----------------------------------------- |
-| 2   | - Làm quen với các thành viên FCJ <br> - Đọc và lưu ý các nội quy, quy định tại đơn vị thực tập                                                                                             | 11/08/2025   | 11/08/2025      |
-| 3   | - Tìm hiểu AWS và các loại dịch vụ <br>&emsp; + Compute <br>&emsp; + Storage <br>&emsp; + Networking <br>&emsp; + Database <br>&emsp; + ... <br>                                            | 12/08/2025   | 12/08/2025      | <https://cloudjourney.awsstudygroup.com/> |
-| 4   | - Tạo AWS Free Tier account <br> - Tìm hiểu AWS Console & AWS CLI <br> - **Thực hành:** <br>&emsp; + Tạo AWS account <br>&emsp; + Cài AWS CLI & cấu hình <br> &emsp; + Cách sử dụng AWS CLI | 13/08/2025   | 13/08/2025      | <https://cloudjourney.awsstudygroup.com/> |
-| 5   | - Tìm hiểu EC2 cơ bản: <br>&emsp; + Instance types <br>&emsp; + AMI <br>&emsp; + EBS <br>&emsp; + ... <br> - Các cách remote SSH vào EC2 <br> - Tìm hiểu Elastic IP   <br>                  | 14/08/2025   | 15/08/2025      | <https://cloudjourney.awsstudygroup.com/> |
-| 6   | - **Thực hành:** <br>&emsp; + Tạo EC2 instance <br>&emsp; + Kết nối SSH <br>&emsp; + Gắn EBS volume                                                                                         | 15/08/2025   | 15/08/2025      | <https://cloudjourney.awsstudygroup.com/> |
+### Các công việc thực hiện trong tuần này
+| Ngày | Công việc | Ngày bắt đầu | Ngày hoàn thành | Tài liệu tham khảo |
+|-----|------|------------|-----------------|--------------------|
+| Thứ 2 | - Xem xét tất cả infrastructure components và dependencies <br> - Tạo comprehensive architecture documentation | 13/11/2025 | 16/11/2025 | — |
+| Thứ 3 | - Weekly Scrum/Meeting: Báo cáo tiến độ và đồng bộ hóa với đội | 13/11/2025 | 16/11/2025 | — |
+| Thứ 4 | - Tiến hành load testing sử dụng Apache JMeter hoặc similar tool <br> - Xác minh auto-scaling triggers và response | 13/11/2025 | 16/11/2025 | <a href="https://jmeter.apache.org/">Apache JMeter</a> |
+| Thứ 5 | - Mô phỏng RDS failover và xác minh application recovery <br> - Kiểm tra ECS task termination và restart behavior | 13/11/2025 | 16/11/2025 | <a href="https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_UpgradeDBInstance.Maintenance.html">RDS Failover</a> |
+| Thứ 6 | - Tài liệu hóa infrastructure costs và optimization recommendations <br> - Tạo runbooks cho common operational tasks | 13/11/2025 | 16/11/2025 | — |
+| Thứ 7 | - Final review và cleanup <br> - Trình bày project completion và lessons learned | 13/11/2025 | 16/11/2025 | — |
 
+### Những thành tích của Tuần 12
 
-### Kết quả đạt được tuần 12:
+- Hoàn thành thành công end-to-end infrastructure deployment bao gồm compute, networking, database, và CI/CD.
+- Xác minh application resilience thông qua multi-point failure testing.
+- Tài liệu hóa tất cả components bao gồm architecture diagrams, runbooks, và cost analysis.
+- Xác nhận auto-scaling policies respond chính xác dưới load.
+- Kiểm tra backup và recovery procedures cho RDS và S3 data.
+- Cung cấp production-ready infrastructure với monitoring và alerting.
 
-* Hiểu AWS là gì và nắm được các nhóm dịch vụ cơ bản: 
-  * Compute
-  * Storage
-  * Networking 
-  * Database
-  * ...
+### Những thách thức và bài học
 
-* Đã tạo và cấu hình AWS Free Tier account thành công.
+- Load testing tiết lộ connection pooling issues ở scale; tối ưu hóa application settings.
+- Failover testing phơi bày security group rules cần updating cho backup scenarios.
+- Infrastructure-as-Code sẽ đơn giản hóa deployment và documentation đáng kể.
+- Regular cost reviews nên được lập lịch để tối ưu hóa resource utilization.
 
-* Làm quen với AWS Management Console và biết cách tìm, truy cập, sử dụng dịch vụ từ giao diện web.
+### Kết quả tổng quát của Thực tập
 
-* Cài đặt và cấu hình AWS CLI trên máy tính bao gồm:
-  * Access Key
-  * Secret Key
-  * Region mặc định
-  * ...
+Trong 12 tuần thực tập, thành công xây dựng complete cloud infrastructure từ đầu:
+- **Infrastructure**: VPC với ELB, multi-AZ RDS, DynamoDB, và S3 storage
+- **Containerization**: Docker, ECR, và ECS Fargate cho application deployment
+- **CI/CD**: Automated pipeline từ GitHub tới production qua CodePipeline và CodeBuild
+- **Monitoring**: Comprehensive CloudWatch dashboards và alerting
+- **DNS & Security**: Route53 domain management với HTTPS qua ACM
 
-* Sử dụng AWS CLI để thực hiện các thao tác cơ bản như:
-
-  * Kiểm tra thông tin tài khoản & cấu hình
-  * Lấy danh sách region
-  * Xem dịch vụ EC2
-  * Tạo và quản lý key pair
-  * Kiểm tra thông tin dịch vụ đang chạy
-  * ...
-
-* Có khả năng kết nối giữa giao diện web và CLI để quản lý tài nguyên AWS song song.
-* ...
-
-
+Key learnings bao gồm infrastructure design patterns, cost optimization, security best practices, và operational excellence. Thực tập cung cấp practical experience với enterprise-scale AWS deployments.

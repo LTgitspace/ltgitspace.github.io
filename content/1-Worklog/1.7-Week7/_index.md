@@ -21,7 +21,7 @@ pre: " <b> 1.7. </b> "
 |-----|------|------------|-----------------|--------------------|
 | Mon | - Register a domain on Route53 <br> - Configure Route53 hosted zone | 09/10/2025 | 12/10/2025 | <a href="https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/">Route53 Documentation</a> |
 | Tue | - Request an SSL/TLS certificate via ACM <br> - Validate domain ownership | 09/10/2025 | 12/10/2025 | <a href="https://docs.aws.amazon.com/acm/">ACM Documentation</a> |
-| Wed | - Create Route53 A records pointing to Application Load Balancer <br> - Test DNS resolution | 09/10/2025 | 12/10/2025 | <a href="https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/ResourceRecordTypes.html">DNS Record Types</a> |
+| Wed | - Weekly Scrum/Meeting: Progress report and team synchronization | 09/10/2025 | 12/10/2025 | — |
 | Thu | - Configure HTTPS listener on ALB with ACM certificate <br> - Set up HTTP to HTTPS redirect | 09/10/2025 | 12/10/2025 | <a href="https://docs.aws.amazon.com/elasticloadbalancing/latest/application/listener-update-rules.html">ALB Listener Rules</a> |
 | Fri | - Test HTTPS connectivity and certificate validity <br> - Configure DNS failover (optional) | 09/10/2025 | 12/10/2025 | <a href="https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/dns-failover.html">DNS Failover Guide</a> |
 | Sat | - Monitor Route53 query metrics <br> - Document domain and certificate details | 09/10/2025 | 12/10/2025 | — |
