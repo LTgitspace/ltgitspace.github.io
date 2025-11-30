@@ -6,10 +6,6 @@ chapter: false
 pre: " <b> 1.6. </b> "
 ---
 
-{{% notice warning %}}
-⚠️ **Note:** The following information is for reference purposes only. Please **do not copy verbatim** for your own report, including this warning.
-{{% /notice %}}
-
 ### Week 6 Objectives
 
 - Set up continuous integration and deployment (CI/CD) pipeline using AWS CodePipeline.
