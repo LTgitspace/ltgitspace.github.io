@@ -1,111 +1,190 @@
 ---
-title : "On-premises DNS Simulation"
+title: "DNS Simulation & Route 53 Configuration"
 date: "2025-01-01"
-weight : 4
-chapter : false
-pre : " <b> 5.4.4 </b> "
+weight: 4
+chapter: false
+pre: " <b> 5.4.4 </b> "
 ---
 
-AWS PrivateLink endpoints have a fixed IP address in each Availability Zone where they are deployed, for the life of the endpoint (until it is deleted). These IP addresses are attached to Elastic Network Interfaces (ENIs). AWS recommends using DNS to resolve the IP addresses for endpoints so that downstream applications use the latest IP addresses when ENIs are added to new AZs, or deleted over time.
+## Overview
 
-In this section, you will create a forwarding rule to send DNS resolution requests from a simulated on-premises environment to a Route 53 Private Hosted Zone. This section leverages the infrastructure deployed by CloudFormation in the Prepare the environment section.
+In this section, you will configure Route 53 to simulate DNS resolution for the S3 interface endpoint from the on-premises environment. This demonstrates how DNS forwarding works when accessing AWS services through private endpoints.
 
-#### Create DNS Alias Records for the Interface endpoint
-1. Navigate to the [Route 53 management console](https://us-east-1.console.aws.amazon.com/route53/v2/hostedzones?region=us-east-1#) (Hosted Zones section).  The CloudFormation template you deployed in the Prepare the environment section created this Private Hosted Zone. Click on the name of the Private Hosted Zone, s3.us-east-1.amazonaws.com:
+---
 
-![hosted zone](/images/5-Workshop/5.4-S3-onprem/hosted-zone.png)
+## Part 1: Create Private Hosted Zone
 
-2. Create a new record in the Private Hosted Zone:
+1. Route 53 Console
+2. Click "Hosted zones"
+3. Click "Create hosted zone"
 
-![Create record](/images/5-Workshop/5.4-S3-onprem/create-record1.png)
+Configuration:
+- Domain name: `s3.us-east-1.amazonaws.com`
+- Type: Private hosted zone
+- VPC: Select "VPC Cloud"
+- Tags: Environment=workshop
 
-+ Record name and record type keep default options
-+ Alias Button: Click to enable
-+ Route traffic to: Alias to VPC Endpoint
-+ Region: US East (N. Virginia) [us-east-1]
-+ Choose endpoint: Paste the Regional VPC Endpoint DNS name from your text editor (you saved when doing section 4.3)
+![Create Hosted Zone](/images/5-Workshop/5.4-S3-onprem/create-hosted-zone.png)
 
-![record1](/images/5-Workshop/5.4-S3-onprem/record1.png)
+---
 
-3. Click Add another record, and add a second record using the following values. Click Create records when finished to create both records.
-+ Record name: *.
-+ Record type: keep default value (type A)
-+ Alias Button: Click to enable
-+ Route traffic to: Alias to VPC Endpoint
-+ Region: US East (N. Virginia) [us-east-1]
-+ Choose endpoint: Paste the Regional VPC Endpoint DNS name from your text editor
+## Part 2: Create Alias Record
 
-![record 2](/images/5-Workshop/5.4-S3-onprem/record2.png)
+1. From the hosted zone, click "Create record"
+2. Record configuration:
+   - Name: `bucket` (to create `bucket.s3.us-east-1.amazonaws.com`)
+   - Type: A
+   - Alias: Yes
+   - Alias target: Your S3 interface endpoint DNS name
 
-The new records appear in the Route 53 console:
+![Create Record](/images/5-Workshop/5.4-S3-onprem/create-record.png)
 
-![result](/images/5-Workshop/5.4-S3-onprem/result.png)
+3. Click "Create records"
 
-#### Create a Resolver Forwarding Rule
+---
 
-Route 53 Resolver Forwarding Rules allow you to forward DNS queries from your VPC to other sources for name resolution. Outside of a workshop environment, you might use this feature to forward DNS queries from your VPC to DNS servers running on-premises. In this section, you will simulate an on-premises conditional forwarder by creating a forwarding rule that forwards DNS queries for Amazon S3 to a Private Hosted Zone running in "VPC Cloud" in-order to resolve the PrivateLink interface endpoint regional DNS name.
+## Part 3: Setup Route 53 Resolver
 
-1. From the Route 53 management console, click **Inbound endpoints** on the left side bar
-2. In the Inbound endpoints console, click the ID of the inbound endpoint
+### Create Inbound Endpoint (Cloud VPC)
 
-![Inbound endpoint](/images/5-Workshop/5.4-S3-onprem/route53-1.png)
+This endpoint receives DNS requests from on-premises environment.
 
-3. Copy the two IP addresses listed to your text editor
+1. Route 53 → Resolver
+2. Click "Inbound endpoints"
+3. Click "Create inbound endpoint"
 
-![Ip addresses](/images/5-Workshop/5.4-S3-onprem/route53-2.png)
+Configuration:
+- Name: `inbound-endpoint-cloud`
+- VPC: VPC Cloud
+- Security group: Allow UDP/TCP port 53 from on-premises CIDR
+- IP addresses: Select 2 subnets in different AZs
 
-4. From the Route 53 menu, choose **Resolver** > **Rules**, and click **Create rule**:
+![Inbound Endpoint](/images/5-Workshop/5.4-S3-onprem/inbound-endpoint.png)
 
-![Ip addresses](/images/5-Workshop/5.4-S3-onprem/route53-3.png)
+### Create Outbound Endpoint (On-prem VPC)
 
-5. In the Create rule console:
-+ Name: myS3Rule
-+ Rule type: Forward
-+ Domain name: s3.us-east-1.amazonaws.com
+This endpoint forwards DNS requests from on-premises to cloud.
 
-![create rule](/images/5-Workshop/5.4-S3-onprem/route53-4.png)
+1. Click "Outbound endpoints"
+2. Click "Create outbound endpoint"
 
-+ VPC: VPC On-prem
-+ Outbound endpoint: VPCOnpremOutboundEndpoint
+Configuration:
+- Name: `outbound-endpoint-onprem`
+- VPC: VPC On-prem
+- Security group: Allow all outbound to inbound endpoint
+- IP addresses: Select 2 subnets
 
-![create rule](/images/5-Workshop/5.4-S3-onprem/route53-5.png)
+![Outbound Endpoint](/images/5-Workshop/5.4-S3-onprem/outbound-endpoint.png)
 
-+ Target IP Addresses: Enter both IP addresses from your text editor (inbound endpoint addresses) and then click Submit
+---
 
-![create rule](/images/5-Workshop/5.4-S3-onprem/route53-6.png)
-You have successfully created resolver forwarding rule. 
+## Part 4: Create Resolver Rules
 
-![create rule](/images/5-Workshop/5.4-S3-onprem/route53-7.png)
+### Create Forwarding Rule
 
-#### Test the on-premises DNS Simulation
+1. Route 53 → Resolver → Rules
+2. Click "Create rule"
 
-1. Connect to **Test-Interface-Endpoint EC2 instance** with **Session manager**
+Configuration:
+- Name: `forward-s3-to-cloud`
+- Type: Forward
+- Domain name: `s3.us-east-1.amazonaws.com`
+- Outbound endpoint: `outbound-endpoint-onprem`
+- Target IP addresses: 
+  - Inbound endpoint IP 1
+  - Inbound endpoint IP 2
 
-![create rule](/images/5-Workshop/5.4-S3-onprem/test1.png)
+![Forwarding Rule](/images/5-Workshop/5.4-S3-onprem/forwarding-rule.png)
 
-2. Test DNS resolution. The dig command will return the IP addresses assigned to the VPC Interface endpoint running in VPC Cloud (your IP's will be different): dig +short s3.us-east-1.amazonaws.com 
+3. Associate rule with on-premises VPC
 
-{{% notice note %}}
-The IP addresses returned are the VPC endpoint IP addresses, NOT the Resolver IP addresses you pasted from your text editor. The IP addresses of the Resolver endpoint and the VPC endpoint look similar because they are all from the VPC Cloud CIDR block.
-{{% /notice %}}
+---
 
-![create rule](/images/5-Workshop/5.4-S3-onprem/dig.png)
+## Part 5: Test DNS Resolution
 
+### From Cloud VPC (test-gateway-endpoint)
 
-3. Navigate to the VPC menu (Endpoints section), select the S3 Interface endpoint. Click the Subnets tab and verify that the IP addresses returned by Dig match the VPC endpoint:
+```bash
+# SSH to instance or use Session Manager
+nslookup bucket.s3.us-east-1.amazonaws.com
 
-![create rule](/images/5-Workshop/5.4-S3-onprem/subnet.png)
-
-4. Return to your shell and use the AWS CLI to test listing your S3 buckets:
-
+# Should return the private IP of the interface endpoint
+# Example output:
+# Name: bucket.s3.us-east-1.amazonaws.com
+# Address: 172.0.5.123
 ```
-aws s3 ls --endpoint-url https://s3.us-east-1.amazonaws.com
+
+### From On-prem VPC (test-interface-endpoint)
+
+```bash
+# Using Session Manager
+nslookup bucket.s3.us-east-1.amazonaws.com
+
+# Should resolve through Route 53 resolver
+# and return the interface endpoint private IP
 ```
 
-![create rule](/images/5-Workshop/5.4-S3-onprem/endpoint.png)
+---
 
-5. Terminate your Session Manager session:
+## Part 6: Verify End-to-End Connectivity
 
-![create rule](/images/5-Workshop/5.4-S3-onprem/terminal.png)
+### Upload File Using Resolved DNS Name
 
-In this section you created an Interface endpoint for Amazon S3. This endpoint can be reached from on-premises through Site-to-Site VPN or AWS Direct Connect. Route 53 Resolver outbound endpoints simulated forwarding DNS requests from on-premises to a Private Hosted Zone running the cloud. Route 53 inbound Endpoints recieved the resolution request and returned a response containing the IP addresses of the VPC interface endpoint. Using DNS to resolve the endpoint IP addresses provides high availability in-case of an Availability Zone outage.
+```bash
+# From on-premises environment
+# Create test file
+fallocate -l 100M testfile.xyz
+
+# Upload using DNS name (instead of explicit endpoint URL)
+aws s3 cp testfile.xyz s3://<your-bucket-name> \
+  --region us-east-1
+```
+
+The system should:
+1. Resolve `s3.us-east-1.amazonaws.com` through Route 53 DNS
+2. Forward DNS request through Outbound Resolver
+3. Receive response from Inbound Resolver in cloud
+4. Connect to S3 interface endpoint via private IP
+5. Upload file successfully
+
+---
+
+## Troubleshooting DNS Issues
+
+### Issue: DNS resolution fails
+
+Check:
+- Security groups allow UDP/TCP port 53
+- Resolver rules are properly associated with VPCs
+- Forwarding targets are correct
+
+```bash
+# Debug DNS resolution
+nslookup -type=A bucket.s3.us-east-1.amazonaws.com
+nslookup -debug bucket.s3.us-east-1.amazonaws.com
+```
+
+### Issue: Connection fails after DNS resolution
+
+Check:
+- Network ACLs allow traffic on port 443 (HTTPS)
+- Security groups on interface endpoint allow traffic
+- Route tables have proper routes to interface endpoint
+
+```bash
+# Test connection to endpoint
+curl -v https://bucket.s3.us-east-1.amazonaws.com/
+```
+
+---
+
+## Summary
+
+This section demonstrates:
+- How to use Route 53 Private Hosted Zones for internal DNS
+- How to setup Route 53 Resolver for DNS forwarding
+- How DNS resolution flows from on-premises through AWS to resolve private endpoints
+- Complete end-to-end connectivity for accessing S3 through PrivateLink from on-premises
+
+This pattern can be extended to other AWS services that support PrivateLink endpoints.
+
