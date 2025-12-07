@@ -119,7 +119,7 @@ MongoDB Server (DB-Mongo):
    ↓
 2. Frontend gửi credentials → API Gateway → Lambda (Auth Service)
    ↓
-3. Lambda validate & create user trong RDS
+3. Lambda validate & create user trong PostgreSQL (EC2)
    ↓
 4. AWS Cognito tạo user account
    ↓
@@ -137,7 +137,7 @@ MongoDB Server (DB-Mongo):
    ↓
 3. Lambda (Chat Service) xử lý message
    ↓
-4. Lưu message vào RDS
+4. Lưu message vào MongoDB (EC2)
    ↓
 5. WebSocket broadcast message đến User B (connected)
    ↓
@@ -151,7 +151,7 @@ MongoDB Server (DB-Mongo):
    ↓
 2. Frontend gửi → API Gateway → Lambda (User Service)
    ↓
-3. Lambda validate & update RDS
+3. Lambda validate & update PostgreSQL (EC2)
    ↓
 4. Coach nhận notification (thông qua WebSocket)
    ↓
@@ -185,7 +185,7 @@ MongoDB Server (DB-Mongo):
 2. Module 3: Setup Cognito - User authentication
 3. Module 4: Setup Lambda - Backend functions
 4. Module 5: Setup API Gateway - API endpoints
-5. Module 6: Setup RDS - Database infrastructure
+5. Module 6: Verify EC2 Servers & Databases - PostgreSQL + MongoDB on EC2
 6. Module 7: Setup S3 + CloudFront - Frontend hosting
 7. Module 8: Setup VPC & Security - Network security
 8. Module 9: Monitoring & Logging - System observability

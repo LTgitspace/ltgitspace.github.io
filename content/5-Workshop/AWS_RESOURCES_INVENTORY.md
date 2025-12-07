@@ -107,11 +107,16 @@ Application Tier (leaflungs-backend-sg):
 | sg-012293e2687464913 | launch-wizard-1 | Default |
 | sg-0cf34158cb7f5440b | leaflungs-backend-sg | Backend Lambda |
 | sg-0adb5d7ea1fe0f6bb | leaflungs-nlb-sg | NLB (WebSocket) |
-| sg-027ef04aa3c769ecf | leaflungs-db-sg | RDS Database |
+| sg-027ef04aa3c769ecf | leaflungs-db-sg | EC2 Database Instances |
 | sg-0d2dbd7d32700d8c8 | default | Default |
 
-### RDS Database
-Status: NOT CREATED YET
+### EC2 Database Servers
+Status: DEPLOYED
+
+| Instance ID | Name | Type | IP | Database | Status |
+|-------------|------|------|----|---------|----|
+| i-01dd1a4b2b8b4a41f | DB-PG | t4g.small | 172.0.8.55 | PostgreSQL | Running |
+| i-012ab3c4d5e6f7g8h0 | DB-Mongo | t4g.small | 172.0.8.124 | MongoDB | Running |
 
 ---
 
@@ -156,7 +161,7 @@ VITE_CHAT_WS_URL=https://leaflungs-userinfo-nlb-3c1d58c7a3d41477.elb.ap-southeas
 
 ## Outstanding Items Needed
 
-1. RDS Database (PostgreSQL/MySQL) - NOT CREATED
+1. EC2 Database configuration verification - DEPLOYED
 2. Verify PaymentFunction Lambda role - UNKNOWN
 3. Verify leaflungs-websocket-authorizer Lambda role - UNKNOWN
 4. Verify API Gateway resources & methods
@@ -171,7 +176,7 @@ VITE_CHAT_WS_URL=https://leaflungs-userinfo-nlb-3c1d58c7a3d41477.elb.ap-southeas
 1. Module 3: Verify Cognito configuration
 2. Module 4: Verify Lambda functions & roles
 3. Module 5: Verify API Gateway setup
-4. Module 6: Create/Verify RDS Database
+4. Module 6: Verify EC2 Database Servers (PostgreSQL + MongoDB)
 5. Module 7: Verify S3 & CloudFront
 6. Module 8: Verify VPC & Security Groups
 7. Module 9: Setup Monitoring (CloudWatch, CloudTrail)

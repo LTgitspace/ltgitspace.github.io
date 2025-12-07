@@ -1,480 +1,972 @@
-# Module 6: Verify EC2 Servers & Databases
+# Module 6: Create EC2 Instances & Setup Databases
 
 ## Mục tiêu Module
 
-- Verify 4 EC2 instances đang chạy
-- Kiểm tra database servers (PostgreSQL + MongoDB)
-- Verify application servers (user-cessation + social-media)
-- Test connectivity giữa các servers
-- Configure monitoring & backups
-- Troubleshoot connection issues
+- Tạo 4 EC2 instances từ đầu
+- Setup PostgreSQL trên DB-PG instance
+- Setup MongoDB trên DB-Mongo instance
+- Cấu hình security groups
+- Tạo databases & users
+- Test connectivity giữa instances
+- Setup monitoring & backups
+
+**Duration**: 5-6 giờ
 
 ---
 
-## Phần 1: Inventory EC2 Instances
+## EC2 Instances Overview
 
-### Status Hiện Tại
+4 instances sẽ được tạo ở ap-southeast-1 (t4g.small, ARM-based, cost-effective):
 
-4 EC2 instances running ở ap-southeast-1 (t4g.small):
-
-| Instance ID | Name | IP Address | Type | SG | Created |
-|-------------|------|------------|------|----|---------|
-| i-0d82a626b99a2fecd | DB-PG | 172.0.8.55 | t4g.small | leaflungs-db-sg | 2025-11-30 |
-| i-0374ff6972fd306fe | DB-Mongo | 172.0.8.124 | t4g.small | leaflungs-db-sg | 2025-12-02 |
-| i-01dd1a4b2b8b4a41f | user-cessation | 172.0.3.240 | t4g.small | leaflungs-backend-sg | 2025-11-30 |
-| i-059fae7766eb52ae3 | social-media | 172.0.3.236 | t4g.small | leaflungs-backend-sg | 2025-12-02 |
+| Instance Name | Type | Purpose | Database | Port |
+|---------------|------|---------|----------|------|
+| smoking-db-pg | t4g.small | PostgreSQL Server | smoking_cessation | 5432 |
+| smoking-db-mongo | t4g.small | MongoDB Server | smoking_cessation | 27017 |
+| smoking-app-user | t4g.small | User Cessation App | (PostgreSQL) | 8000 |
+| smoking-app-social | t4g.small | Social Media App | (MongoDB) | 8000 |
 
 ---
 
-## Phần 2: Verify Database Servers
+## Phần 1: Create Security Groups
 
-### 2.1: PostgreSQL Server (DB-PG)
-
-#### Bước 1: Truy cập EC2 Dashboard
+### Bước 1: Create Database Security Group
 
 1. EC2 Console
-2. Click "Instances"
-3. Click instance "DB-PG" (i-0d82a626b99a2fecd)
+2. Left menu: "Security Groups"
+3. Click "Create security group"
+4. **Name**: `smoking-db-sg`
+5. **Description**: Security group for database servers
+6. **VPC**: Default VPC (or your VPC)
+7. Click "Create security group"
 
-![EC2 Instance Details](../assets/06-ec2-instance-details.png)
+![Create Security Group](../assets/06-create-sg.png)
 
-#### Bước 2: Check Instance Status
+### Bước 2: Add Inbound Rules for DB-SG
 
-Verify:
-- State: running
-- Status checks: passed (2/2)
-- IP Address: 172.0.8.55 (private)
-- Security Group: leaflungs-db-sg
-- Instance Type: t4g.small
-- CPU Credits: > 80 (healthy)
+1. Click vào security group vừa tạo
+2. "Inbound rules" → "Edit inbound rules"
+3. Add these rules:
+   - **Type**: PostgreSQL (5432)
+     - **Source**: Custom → `172.0.0.0/16` (internal VPC CIDR)
+   - **Type**: Custom TCP 27017 (MongoDB)
+     - **Source**: `172.0.0.0/16`
+4. Click "Save rules"
 
-![Instance Status](../assets/06-ec2-instance-status.png)
+### Bước 3: Create Application Security Group
 
-#### Bước 3: Test PostgreSQL Connectivity
+1. Click "Create security group"
+2. **Name**: `smoking-app-sg`
+3. **Description**: Security group for application servers
+4. Click "Create security group"
 
-Connect via SSH (if you have keypair):
+### Bước 4: Add Inbound Rules for App-SG
 
-```bash
-ssh -i your-key.pem ec2-user@172.0.8.55
+1. Click vào security group vừa tạo
+2. "Inbound rules" → "Edit inbound rules"
+3. Add rules:
+   - **Type**: SSH (22)
+     - **Source**: My IP (hoặc `0.0.0.0/0` nếu không có fixed IP)
+   - **Type**: Custom TCP 8000 (application)
+     - **Source**: `0.0.0.0/0` (or restrict to NLB later)
+4. Click "Save rules"
 
-# Once logged in
-psql -U postgres -d smokingcessation
-\dt  # List tables
-\q   # Quit
-```
+### Bước 5: Add Outbound Rules
 
-Or check logs:
+1. "Outbound rules" → "Edit outbound rules"
+2. Verify:
+   - All traffic to `smoking-db-sg` (for database access)
+   - All traffic to internet (for package downloads)
+3. Default rule should allow this
+4. Click "Save rules"
 
-```bash
-# View PostgreSQL status
-systemctl status postgresql
+---
 
-# Check logs
-tail -f /var/log/postgresql/postgresql.log
-```
+## Phần 2: Create EC2 Instances
 
-#### Bước 4: Monitor PostgreSQL
-
-1. CloudWatch → EC2 Instances
-2. Select DB-PG instance
-3. View metrics:
-   - CPU Utilization (should be < 20%)
-   - Network In/Out
-   - Disk operations
-
-If CPU too high: May need to scale up instance type
-
-### 2.2: MongoDB Server (DB-Mongo)
-
-#### Bước 1: Truy cập Instance
+### Bước 1: Launch First Instance (PostgreSQL)
 
 1. EC2 Console
-2. Click instance "DB-Mongo" (i-0374ff6972fd306fe)
+2. Click "Launch Instances"
+3. **Name**: `smoking-db-pg`
+4. **AMI**: Amazon Linux 2023 (free tier eligible)
+5. **Instance type**: t4g.small
+6. **Keypair**: Create new or select existing
+   - **Key pair name**: `smoking-cessation-key`
+   - Click "Create key pair"
+   - Download & save securely
+7. Click "Next"
 
-#### Bước 2: Verify Status
+![Launch Instance](../assets/06-launch-instance.png)
 
-Same checks as PostgreSQL:
-- State: running
-- Status checks: 2/2 passed
-- IP: 172.0.8.124
-- SG: leaflungs-db-sg
+### Bước 2: Configure Network
 
-#### Bước 3: Test MongoDB Connectivity
+1. **VPC**: Default VPC (or your VPC)
+2. **Subnet**: Any (or specific subnet in us-southeast-1a)
+3. **Auto-assign public IP**: Disable (private subnet)
+4. **Security group**: `smoking-db-sg`
+5. Click "Next"
+
+### Bước 3: Configure Storage
+
+1. **Size**: 30 GB (enough for databases)
+2. **Volume type**: gp3 (general purpose, cost-effective)
+3. **Delete on termination**: ✅
+4. Click "Next"
+
+### Bước 4: Add Tags
+
+1. **Tag key**: Name
+2. **Tag value**: `smoking-db-pg`
+3. Click "Launch instance"
+
+⏳ **Chờ instance được tạo (2-3 phút)**
+
+### Bước 5: Note Private IP Address
+
+1. Wait for instance status "running"
+2. Copy **Private IPv4 address** (e.g., 172.0.8.55)
+3. Save for later: `PG_HOST=172.0.8.55`
+
+![Instance IP](../assets/06-instance-ip.png)
+
+### Bước 6: Create MongoDB Instance (Same Steps)
+
+1. Click "Launch Instances"
+2. **Name**: `smoking-db-mongo`
+3. Same configuration as PostgreSQL
+4. **Security group**: `smoking-db-sg`
+5. Launch instance
+6. Note IP address: `MONGO_HOST=<ip>`
+
+### Bước 7: Create Application Instances
+
+1. Launch instance: `smoking-app-user`
+   - **Security group**: `smoking-app-sg`
+   - Note IP: `APP_USER_HOST=<ip>`
+
+2. Launch instance: `smoking-app-social`
+   - **Security group**: `smoking-app-sg`
+   - Note IP: `APP_SOCIAL_HOST=<ip>`
+
+All 4 instances should now be running.
+
+---
+
+## Phần 3: Setup PostgreSQL on DB-PG Instance
+
+### Bước 1: Connect to Instance
+
+Using AWS Session Manager (recommended) or SSH:
 
 ```bash
-ssh -i your-key.pem ec2-user@172.0.8.124
+# Via SSH (if you have keypair)
+ssh -i smoking-cessation-key.pem ec2-user@<PRIVATE_IP>
 
-# Once logged in
-mongo --version
-systemctl status mongod
+# Or use Session Manager in EC2 Console
+# Click instance → Connect → Session Manager → Connect
+```
 
+### Bước 2: Update System
+
+```bash
+sudo yum update -y
+sudo yum upgrade -y
+```
+
+### Bước 3: Install PostgreSQL
+
+```bash
+# Add PostgreSQL repository
+sudo tee /etc/yum.repos.d/pgdg.repo > /dev/null <<EOF
+[pgdg15]
+name=PostgreSQL 15 for RHEL/CentOS 9 - x86_64
+baseurl=https://download.postgresql.org/pub/repos/yum/15/rhel/rhel-9-x86_64
+enabled=1
+gpgcheck=1
+gpgkey=https://download.postgresql.org/pub/repos/yum/RPM-GPG-KEY-PGDG
+EOF
+
+# Install PostgreSQL
+sudo yum install -y postgresql15-server postgresql15-contrib
+```
+
+### Bước 4: Initialize Database Cluster
+
+```bash
+# Initialize cluster
+sudo /usr/pgsql-15/bin/initdb -D /var/lib/pgsql/15/data
+
+# Create system user if needed
+sudo useradd postgres || true
+
+# Change permissions
+sudo chown -R postgres:postgres /var/lib/pgsql/15/data
+```
+
+### Bước 5: Start PostgreSQL Service
+
+```bash
+# Enable service to start on boot
+sudo systemctl enable postgresql-15
+
+# Start service
+sudo systemctl start postgresql-15
+
+# Verify status
+sudo systemctl status postgresql-15
+```
+
+### Bước 6: Configure PostgreSQL for Network Access
+
+```bash
+# Edit config file
+sudo nano /var/lib/pgsql/15/data/postgresql.conf
+
+# Find and change these lines:
+# listen_addresses = 'localhost'  → listen_addresses = '*'
+# port = 5432  → keep as is
+
+# Save: Ctrl+O, Enter, Ctrl+X
+```
+
+### Bước 7: Configure Client Authentication
+
+```bash
+# Edit pg_hba.conf
+sudo nano /var/lib/pgsql/15/data/pg_hba.conf
+
+# Add this line at the end (before any reject lines):
+# host    all             all             172.0.0.0/16            md5
+
+# This allows connections from VPC CIDR 172.0.0.0/16
+```
+
+### Bước 8: Restart PostgreSQL
+
+```bash
+sudo systemctl restart postgresql-15
+sudo systemctl status postgresql-15
+```
+
+### Bước 9: Create smoking_cessation Database
+
+```bash
+# Switch to postgres user
+sudo su - postgres
+
+# Connect to psql
+psql
+
+# Create database
+CREATE DATABASE smoking_cessation;
+
+# Create application user
+CREATE USER app_user WITH PASSWORD 'YourSecurePassword123!';
+
+# Grant privileges
+GRANT ALL PRIVILEGES ON DATABASE smoking_cessation TO app_user;
+
+# Connect to database
+\c smoking_cessation
+
+# Grant schema privileges
+GRANT ALL ON SCHEMA public TO app_user;
+GRANT ALL ON ALL TABLES IN SCHEMA public TO app_user;
+GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO app_user;
+
+# Verify
+\du  # List users
+\l   # List databases
+
+# Exit
+\q
+exit
+```
+
+### Bước 10: Verify PostgreSQL is Listening
+
+```bash
+# Check if listening on port 5432
+sudo netstat -tlnp | grep 5432
+
+# Or use ss command
+sudo ss -tlnp | grep 5432
+
+# Output should show: LISTEN ... 0.0.0.0:5432 or :::5432
+```
+
+---
+
+## Phần 4: Setup MongoDB on DB-Mongo Instance
+
+### Bước 1: Connect to Instance
+
+```bash
+ssh -i smoking-cessation-key.pem ec2-user@<MONGO_PRIVATE_IP>
+# Or use Session Manager
+```
+
+### Bước 2: Update System
+
+```bash
+sudo yum update -y
+sudo yum upgrade -y
+```
+
+### Bước 3: Install MongoDB
+
+```bash
+# Create MongoDB repository
+sudo tee /etc/yum.repos.d/mongodb-org.repo > /dev/null <<EOF
+[mongodb-org-7.0]
+name=MongoDB Repository
+baseurl=https://repo.mongodb.org/yum/amazon/2023/mongodb-org/7.0/x86_64/
+gpgcheck=1
+enabled=1
+gpgkey=https://www.mongodb.org/static/pgp/server-7.0.asc
+EOF
+
+# Install MongoDB
+sudo yum install -y mongodb-org
+```
+
+### Bước 4: Configure MongoDB for Network Access
+
+```bash
+# Edit MongoDB config
+sudo nano /etc/mongod.conf
+
+# Find these sections and modify:
+
+# network:
+#   port: 27017
+#   bindIp: localhost  → Change to bindIp: 0.0.0.0
+
+# Save: Ctrl+O, Enter, Ctrl+X
+```
+
+### Bước 5: Start MongoDB Service
+
+```bash
+# Enable service to start on boot
+sudo systemctl enable mongod
+
+# Start service
+sudo systemctl start mongod
+
+# Verify status
+sudo systemctl status mongod
+```
+
+### Bước 6: Create MongoDB Database & User
+
+```bash
+# Connect to MongoDB
+mongosh
+
+# Switch to admin database
+use admin
+
+# Create admin user
+db.createUser({
+  user: "admin",
+  pwd: "YourAdminPassword123!",
+  roles: ["root"]
+})
+
+# Exit mongosh
+exit
+
+# Restart with authentication
+sudo nano /etc/mongod.conf
+
+# Find security section and uncomment:
+# security:
+#   authorization: enabled
+
+# Save and restart
+sudo systemctl restart mongod
+```
+
+### Bước 7: Create Application Database & User
+
+```bash
+# Connect with authentication
+mongosh -u admin -p YourAdminPassword123!
+
+# Switch to smoking_cessation database
+use smoking_cessation
+
+# Create application user
+db.createUser({
+  user: "app_user",
+  pwd: "AppPassword123!",
+  roles: [{role: "readWrite", db: "smoking_cessation"}]
+})
+
+# Verify user created
+show users
+
+# Exit
+exit
+```
+
+### Bước 8: Verify MongoDB is Listening
+
+```bash
 # Check if listening on port 27017
-netstat -tlnp | grep 27017
-```
+sudo netstat -tlnp | grep 27017
 
-#### Bước 4: Monitor MongoDB
+# Or
+sudo ss -tlnp | grep 27017
 
-1. CloudWatch → EC2 Instances
-2. Select DB-Mongo
-3. View metrics (same as PostgreSQL)
-
----
-
-## Phần 3: Verify Application Servers
-
-### 3.1: user-cessation Server
-
-#### Bước 1: Truy cập Instance
-
-1. EC2 Console
-2. Click instance "user-cessation" (i-01dd1a4b2b8b4a41f)
-
-#### Bước 2: Verify Running
-
-Check:
-- State: running
-- Status: 2/2 passed
-- IP: 172.0.3.240
-- SG: leaflungs-backend-sg
-- Port: 8000 (application)
-
-#### Bước 3: Test Application
-
-Connect via SSH:
-
-```bash
-ssh -i your-key.pem ec2-user@172.0.3.240
-
-# Check application status
-systemctl status user-cessation  # or your service name
-
-# Check if listening on port 8000
-netstat -tlnp | grep 8000
-
-# View logs
-tail -f /var/log/user-cessation/app.log
-```
-
-Or test via API Gateway:
-
-```bash
-curl -H "Authorization: Bearer <TOKEN>" \
-  https://v7agf76rrh.execute-api.ap-southeast-1.amazonaws.com/prod/api/user-info
-```
-
-#### Bước 4: Monitor Application
-
-1. CloudWatch → EC2 Instances
-2. Select user-cessation
-3. View:
-   - CPU Utilization
-   - Network traffic
-   - Disk usage
-   - Memory (if CloudWatch agent installed)
-
-### 3.2: social-media Server
-
-Same steps as user-cessation:
-
-1. Instance: i-059fae7766eb52ae3
-2. IP: 172.0.3.236
-3. Port: 8000
-4. SG: leaflungs-backend-sg
-
----
-
-## Phần 4: Test Inter-Server Connectivity
-
-### Test PostgreSQL Access from App Server
-
-From user-cessation instance:
-
-```bash
-# Test PostgreSQL connectivity
-psql -h 172.0.8.55 -U postgres -d smokingcessation -c "SELECT 1"
-
-# Should return: 1 (success)
-```
-
-### Test MongoDB Access from App Server
-
-```bash
-# Test MongoDB connectivity
-mongo --host 172.0.8.124 --eval "db.adminCommand('ping')"
-
-# Should return: { ok: 1 }
-```
-
-### Test EC2 to EC2 Communication
-
-```bash
-# From app server to database server
-ping -c 3 172.0.8.55  # PostgreSQL
-ping -c 3 172.0.8.124 # MongoDB
-
-# Check response times (should be < 5ms in same VPC)
+# Output should show LISTEN on port 27017
 ```
 
 ---
 
-## Phần 5: Verify Security Groups
+## Phần 5: Test Database Connectivity
 
-### Security Group Configuration
+### Bước 1: Test PostgreSQL from App Instance
 
-Verify rules allow communication:
+Connect to application instance:
 
-#### leaflungs-backend-sg (Application servers)
-Inbound rules:
-- SSH (22): from admin IP or bastion
-- HTTP (80): from NLB (optional, if using HTTP)
-- HTTPS (443): from NLB (optional, if TLS at app level)
-- Custom TCP 8000: from API Gateway / NLB
+```bash
+ssh -i smoking-cessation-key.pem ec2-user@<APP_USER_HOST>
 
-Outbound rules:
-- All to leaflungs-db-sg (database access)
+# Install PostgreSQL client
+sudo yum install -y postgresql15
 
-#### leaflungs-db-sg (Database servers)
-Inbound rules:
-- PostgreSQL (5432): from leaflungs-backend-sg
-- MongoDB (27017): from leaflungs-backend-sg
+# Test connection to PostgreSQL
+psql -h <PG_HOST_IP> -U app_user -d smoking_cessation -c "SELECT 1"
 
-Outbound rules:
-- All traffic (default)
+# Expected output: Should show "1" (success)
+```
 
-### Update Security Groups if Needed
+### Bước 2: Test MongoDB from App Instance
 
-1. VPC → Security Groups
-2. Select "leaflungs-backend-sg"
-3. Click "Edit inbound rules"
-4. Verify or add:
-   - Port 8000 from 0.0.0.0/0 (public)
-   - Or from NLB security group only (more secure)
+```bash
+# Install MongoDB tools
+sudo yum install -y mongodb-mongosh
+
+# Test connection to MongoDB
+mongosh --host <MONGO_HOST_IP>:27017 --username app_user --password AppPassword123! --authenticationDatabase smoking_cessation --eval "db.adminCommand('ping')"
+
+# Expected output: { ok: 1 }
+```
+
+### Bước 3: Test Inter-Instance Ping
+
+```bash
+# From any instance, test network connectivity
+ping -c 3 <TARGET_IP>
+
+# Expected: Low latency (< 5ms in same VPC)
+```
 
 ---
 
-## Phần 6: Configure Monitoring & CloudWatch Agent
+## Phần 6: Create Database Tables (PostgreSQL)
 
-### 6.1: Install CloudWatch Agent (Optional but Recommended)
+### Bước 1: Connect to Database
 
-On each EC2 instance:
+From app instance or via psql:
 
 ```bash
-# Download agent
-wget https://s3.amazonaws.com/amazoncloudwatch-agent/amazon_linux/amd64/latest/amazon-cloudwatch-agent.rpm
-
-# Install
-rpm -U ./amazon-cloudwatch-agent.rpm
-
-# Configure
-/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-config-wizard
-
-# Start agent
-systemctl start amazon-cloudwatch-agent
-systemctl enable amazon-cloudwatch-agent
+# Connect to smoking_cessation database
+psql -h <PG_HOST_IP> -U app_user -d smoking_cessation
 ```
 
-### 6.2: Setup EC2 Detailed Monitoring
+### Bước 2: Create Tables
+
+```sql
+-- Create users table
+CREATE TABLE users (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  cognito_id VARCHAR(255) UNIQUE NOT NULL,
+  email VARCHAR(255) UNIQUE NOT NULL,
+  name VARCHAR(255) NOT NULL,
+  role VARCHAR(50) DEFAULT 'user',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create coaches table
+CREATE TABLE coaches (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  specialization VARCHAR(255),
+  bio TEXT,
+  hourly_rate DECIMAL(10, 2),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create coaching_sessions table
+CREATE TABLE coaching_sessions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  coach_id UUID REFERENCES coaches(id) ON DELETE SET NULL,
+  status VARCHAR(50) DEFAULT 'active',
+  started_at TIMESTAMP,
+  ended_at TIMESTAMP,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create indexes for performance
+CREATE INDEX idx_users_cognito_id ON users(cognito_id);
+CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_coaches_user_id ON coaches(user_id);
+CREATE INDEX idx_sessions_user_id ON coaching_sessions(user_id);
+CREATE INDEX idx_sessions_coach_id ON coaching_sessions(coach_id);
+
+-- Grant permissions to app_user
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO app_user;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO app_user;
+
+-- Verify tables
+\dt
+```
+
+### Bước 3: Exit psql
+
+```sql
+\q
+```
+
+---
+
+## Phần 7: Setup Application Servers (EC2 Instances)
+
+### Bước 1: Connect to Application Instance
+
+```bash
+ssh -i smoking-cessation-key.pem ec2-user@<APP_USER_HOST>
+```
+
+### Bước 2: Install Node.js & npm
+
+```bash
+# Update system
+sudo yum update -y
+
+# Install Node.js (Amazon Linux version)
+curl -fsSL https://rpm.nodesource.com/setup_20.x | sudo bash -
+sudo yum install -y nodejs
+
+# Verify installation
+node --version
+npm --version
+```
+
+### Bước 3: Create Application Directory
+
+```bash
+# Create app directory
+sudo mkdir -p /opt/smoking-cessation
+sudo chown -R ec2-user:ec2-user /opt/smoking-cessation
+
+# Change to directory
+cd /opt/smoking-cessation
+
+# Create basic package.json
+cat > package.json << 'EOF'
+{
+  "name": "smoking-cessation-app",
+  "version": "1.0.0",
+  "description": "Smoking cessation user app",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "pg": "^8.10.0"
+  }
+}
+EOF
+
+# Install dependencies
+npm install
+```
+
+### Bước 4: Create Basic Express Server
+
+```bash
+# Create server.js
+cat > server.js << 'EOF'
+const express = require('express');
+const { Pool } = require('pg');
+
+const app = express();
+const port = 8000;
+
+// Database connection pool
+const pool = new Pool({
+  user: 'app_user',
+  password: process.env.DB_PASSWORD || 'AppPassword123!',
+  host: process.env.DB_HOST || 'localhost',
+  port: 5432,
+  database: 'smoking_cessation'
+});
+
+app.use(express.json());
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', service: 'user-app' });
+});
+
+// Test database connection
+app.get('/db-test', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT NOW()');
+    res.json({ message: 'Database connected', time: result.rows[0] });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.listen(port, () => {
+  console.log(`App listening on port ${port}`);
+});
+EOF
+```
+
+### Bước 5: Test Application
+
+```bash
+# Start server
+node server.js
+
+# In another terminal, test endpoints
+curl http://localhost:8000/health
+curl http://localhost:8000/db-test
+
+# Ctrl+C to stop
+```
+
+### Bước 6: Create Systemd Service (Optional)
+
+```bash
+# Create service file
+sudo tee /etc/systemd/system/smoking-app.service > /dev/null <<EOF
+[Unit]
+Description=Smoking Cessation Application
+After=network.target
+
+[Service]
+Type=simple
+User=ec2-user
+WorkingDirectory=/opt/smoking-cessation
+ExecStart=/usr/bin/node server.js
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# Enable and start service
+sudo systemctl daemon-reload
+sudo systemctl enable smoking-app
+sudo systemctl start smoking-app
+sudo systemctl status smoking-app
+```
+
+---
+
+## Phần 8: Setup Monitoring & CloudWatch
+
+### Bước 1: Enable Detailed Monitoring
 
 1. EC2 Console
 2. Select each instance
-3. Right-click → Monitor and troubleshoot
+3. Right-click → "Monitoring and troubleshooting"
 4. Click "Enable detailed monitoring"
 
-This provides 1-minute metrics instead of 5-minute
+This provides 1-minute metrics instead of default 5-minute.
 
-### 6.3: Create Custom CloudWatch Alarms
+### Bước 2: Create CloudWatch Alarms
 
-For EC2 instances:
+For high CPU on database instances:
 
-```bash
-# High CPU alarm
-aws cloudwatch put-metric-alarm \
-  --alarm-name ec2-high-cpu-user-cessation \
-  --alarm-description "CPU > 80%" \
-  --metric-name CPUUtilization \
-  --namespace AWS/EC2 \
-  --statistic Average \
-  --period 300 \
-  --threshold 80 \
-  --comparison-operator GreaterThanThreshold \
-  --dimensions Name=InstanceId,Value=i-01dd1a4b2b8b4a41f \
-  --alarm-actions arn:aws:sns:ap-southeast-1:140570829989:email-notifications \
-  --region ap-southeast-1
-```
+1. CloudWatch Console
+2. "Alarms" → "Create alarm"
+3. **Metric**:
+   - Namespace: AWS/EC2
+   - Metric: CPUUtilization
+   - Dimension: Instance ID (select DB-PG)
+4. **Conditions**:
+   - Statistic: Average
+   - Period: 5 minutes
+   - Threshold: > 80%
+5. **Notification**: Create SNS topic for alerts
+6. Click "Create alarm"
+
+Repeat for all instances.
+
+### Bước 3: Create Dashboard
+
+1. CloudWatch → Dashboards
+2. "Create dashboard"
+3. **Name**: `smoking-cessation-infrastructure`
+4. Add widgets:
+   - EC2 CPU Utilization (all instances)
+   - Network In/Out
+   - Disk usage (if CloudWatch agent installed)
+5. Click "Create dashboard"
 
 ---
 
-## Phần 7: Database Backup Strategy
+## Phần 9: Setup Database Backups
 
-### 7.1: PostgreSQL Backups
+### Bước 1: Create Backup Directory
 
-On DB-PG instance:
+On each database instance:
 
 ```bash
-# Create backup
-pg_dump -U postgres smokingcessation > backup_$(date +%Y%m%d).sql
+# Create backup directory
+sudo mkdir -p /backups
+sudo chown -R postgres:postgres /backups  # For PostgreSQL
+```
 
-# Or automated daily backup
+### Bước 2: PostgreSQL Automated Backup
+
+```bash
+# Connect as ec2-user
+ssh -i smoking-cessation-key.pem ec2-user@<PG_HOST>
+
+# Create backup script
+cat > ~/backup-pg.sh << 'EOF'
+#!/bin/bash
+BACKUP_DIR="/backups"
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+BACKUP_FILE="$BACKUP_DIR/smoking_cessation_$TIMESTAMP.sql"
+
+sudo -u postgres pg_dump -d smoking_cessation -h localhost > "$BACKUP_FILE"
+
+# Keep only last 7 days of backups
+find $BACKUP_DIR -name "smoking_cessation_*.sql" -mtime +7 -delete
+
+echo "Backup completed: $BACKUP_FILE"
+EOF
+
+# Make executable
+chmod +x ~/backup-pg.sh
+
+# Test backup
+./backup-pg.sh
+
+# Add to crontab for daily backups at 3 AM
 crontab -e
-# Add: 0 3 * * * /usr/bin/pg_dump -U postgres smokingcessation > /backups/backup_$(date +\%Y\%m\%d).sql
+# Add: 0 3 * * * /home/ec2-user/backup-pg.sh >> /var/log/postgres-backup.log 2>&1
 ```
 
-### 7.2: MongoDB Backups
-
-On DB-Mongo instance:
+### Bước 3: MongoDB Automated Backup
 
 ```bash
-# Create backup
-mongodump --db smokingcessation --out /backups/backup_$(date +%Y%m%d)
+# Connect as ec2-user
+ssh -i smoking-cessation-key.pem ec2-user@<MONGO_HOST>
 
-# Or automated backup
+# Create backup script
+cat > ~/backup-mongo.sh << 'EOF'
+#!/bin/bash
+BACKUP_DIR="/backups"
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+BACKUP_PATH="$BACKUP_DIR/smoking_cessation_$TIMESTAMP"
+
+mongodump --username=admin --password="YourAdminPassword123!" --db smoking_cessation --out "$BACKUP_PATH"
+
+# Keep only last 7 days
+find $BACKUP_DIR -maxdepth 1 -type d -mtime +7 -exec rm -rf {} \;
+
+echo "MongoDB backup completed: $BACKUP_PATH"
+EOF
+
+# Make executable
+chmod +x ~/backup-mongo.sh
+
+# Test backup
+./backup-mongo.sh
+
+# Add to crontab for daily backups at 4 AM
 crontab -e
-# Add: 0 4 * * * /usr/bin/mongodump --db smokingcessation --out /backups/backup_$(date +\%Y\%m\%d)
+# Add: 0 4 * * * /home/ec2-user/backup-mongo.sh >> /var/log/mongo-backup.log 2>&1
 ```
 
-### 7.3: Upload Backups to S3
+### Bước 4: Upload Backups to S3 (Optional)
+
+To backup off-instance (safer):
 
 ```bash
-# Upload to S3 (run from EC2)
-aws s3 sync /backups s3://smoking-cessation-backups/databases/
+# Configure AWS CLI on instance (requires IAM role)
+aws configure
 
-# Set S3 lifecycle policy to archive after 30 days
-aws s3api put-bucket-lifecycle-configuration \
-  --bucket smoking-cessation-backups \
-  --lifecycle-configuration file://lifecycle.json
+# Modify backup scripts to upload to S3:
+# aws s3 cp $BACKUP_FILE s3://smoking-cessation-backups/
 ```
 
 ---
 
-## Phần 8: Troubleshooting
+## Environment Variables Summary
 
-### Issue: Cannot Connect to PostgreSQL
+Save these for Lambda functions & applications:
 
-```bash
-# Check if PostgreSQL is listening
-netstat -tlnp | grep 5432
+```env
+# PostgreSQL
+PG_HOST=<DB-PG_PRIVATE_IP>
+PG_USER=app_user
+PG_PASSWORD=AppPassword123!
+PG_DATABASE=smoking_cessation
+PG_PORT=5432
 
-# Check PostgreSQL logs
-tail -100 /var/log/postgresql/postgresql.log
+# MongoDB
+MONGO_HOST=<DB-Mongo_PRIVATE_IP>
+MONGO_USERNAME=app_user
+MONGO_PASSWORD=AppPassword123!
+MONGO_DATABASE=smoking_cessation
+MONGO_PORT=27017
+MONGO_URI=mongodb://app_user:AppPassword123!@<MONGO_HOST>:27017/smoking_cessation
 
-# Check security group allows port 5432
+# Application Instances
+APP_USER_HOST=<APP_USER_PRIVATE_IP>
+APP_SOCIAL_HOST=<APP_SOCIAL_PRIVATE_IP>
 ```
-
-### Issue: High CPU on EC2 Instance
-
-```bash
-# Check top processes
-top -b -n 1 | head -20
-
-# Check what's consuming CPU
-ps aux | sort -rnk 3 | head
-
-# Possible solutions:
-# - Optimize application code
-# - Scale up instance type (t4g.medium)
-# - Add more instances & use load balancing
-```
-
-### Issue: Database Disk Full
-
-```bash
-# Check disk usage
-df -h /var
-
-# If full:
-# - Archive old data
-# - Delete old logs
-# - Expand EBS volume
-```
-
-### Issue: Slow Database Queries
-
-PostgreSQL:
-
-```bash
-# Enable slow query log
-nano /etc/postgresql/13/main/postgresql.conf
-
-# Find & uncomment:
-# log_min_duration_statement = 1000  # Log queries > 1 second
-
-# Restart PostgreSQL
-systemctl restart postgresql
-```
-
-MongoDB:
-
-```bash
-# Enable profiling
-mongo --eval "db.setProfilingLevel(1, { slowms: 1000 })"
-
-# Query slow logs
-mongo --eval "db.system.profile.find({ millis: { \$gt: 1000 } }).pretty()"
-```
-
----
-
-## Phần 9: Cost Optimization
-
-### Current Costs (4 × t4g.small)
-
-- EC2: ~$30/month (4 instances × $0.0252/hour × 730 hours)
-- Data transfer: ~$10/month (between instances & to internet)
-- **Total: ~$40/month**
-
-### Optimization Strategies
-
-1. **Consolidate databases** (if usage low)
-   - Run both PostgreSQL & MongoDB on same instance
-   - Saves ~$8/month
-
-2. **Use Reserved Instances**
-   - 1-year: 30% discount
-   - Saves ~$12/month
-
-3. **Right-size instances** (if usage < 20% CPU average)
-   - Downgrade to t4g.micro
-   - Saves ~$20/month
 
 ---
 
 ## Checklist
 
-- [ ] All 4 EC2 instances verified running
-- [ ] DB-PG PostgreSQL verified accessible
-- [ ] DB-Mongo MongoDB verified accessible
-- [ ] user-cessation application verified running
-- [ ] social-media application verified running
-- [ ] Inter-server connectivity tested
-- [ ] Security groups properly configured
-- [ ] CloudWatch monitoring enabled
-- [ ] Database backups configured
-- [ ] Disaster recovery plan documented
-- [ ] Cost optimization reviewed
-- [ ] Ready for Module 7 (Verify S3 & CloudFront)
+- [ ] 4 EC2 instances launched (DB-PG, DB-Mongo, App-User, App-Social)
+- [ ] Security groups created with proper inbound/outbound rules
+- [ ] PostgreSQL installed, configured, and accessible
+- [ ] MongoDB installed, configured, and accessible
+- [ ] smoking_cessation database created in both databases
+- [ ] Application users created with proper permissions
+- [ ] Database tables created (users, coaches, sessions)
+- [ ] Application instances can connect to databases
+- [ ] Inter-instance connectivity tested (ping, port access)
+- [ ] Node.js & npm installed on app instances
+- [ ] Express server created and tested
+- [ ] CloudWatch detailed monitoring enabled
+- [ ] CloudWatch alarms configured for high CPU
+- [ ] CloudWatch dashboard created
+- [ ] Database backup scripts created and tested
+- [ ] Backup scripts added to crontab
+- [ ] All database credentials saved securely
+- [ ] Sẵn sàng cho Module 7 (Create S3 & CloudFront)
 
 ---
 
-## Notes
+## Troubleshooting
 
-- All instances in private subnets (no public IP)
-- Access via Session Manager or Bastion host
-- Auto-scaling not configured (static 4 instances)
-- No snapshots currently (add for disaster recovery)
-- Database replication not configured (single instance per DB)
+### Cannot Connect to PostgreSQL
+
+**Issue**: Connection refused on port 5432
+
+**Solution**:
+```bash
+# Check PostgreSQL is running
+sudo systemctl status postgresql-15
+
+# Check listening on port 5432
+sudo netstat -tlnp | grep 5432
+
+# Check security group rules allow 5432
+# From app instance, verify: telnet <PG_HOST> 5432
+
+# Check pg_hba.conf allows VPC CIDR
+sudo nano /var/lib/pgsql/15/data/pg_hba.conf
+```
+
+### Cannot Connect to MongoDB
+
+**Issue**: Connection refused on port 27017
+
+**Solution**:
+```bash
+# Check MongoDB is running
+sudo systemctl status mongod
+
+# Check port listening
+sudo netstat -tlnp | grep 27017
+
+# Check mongod.conf bindIp is correct
+sudo nano /etc/mongod.conf
+
+# Verify authentication enabled correctly
+mongosh -u admin -p <password>
+```
+
+### Network Connectivity Issues
+
+**Issue**: Instances cannot ping each other
+
+**Solution**:
+1. Verify all instances are in same VPC
+2. Check security group rules allow traffic between groups
+3. Check Network ACLs don't block traffic
+4. Verify instances have route table entries
+
+### High CPU on Database Instance
+
+**Issue**: CPU Utilization > 80%
+
+**Solution**:
+```bash
+# Check top processes
+top -b -n 1 | head -20
+
+# For PostgreSQL, check long-running queries:
+psql -h localhost -U postgres -d smoking_cessation
+SELECT pid, usename, query, query_start FROM pg_stat_activity WHERE query != 'autovacuum';
+
+# Consider: Scale up instance type, optimize queries, or add replication
+```
+
+---
+
+## Cost Analysis
+
+**Current costs** (4 × t4g.small at $0.0252/hour):
+
+- Compute: ~$30/month (4 instances × 730 hours)
+- Storage: ~$10/month (4 × 30GB EBS volumes)
+- Data transfer: ~$5/month
+- **Total: ~$45/month**
+
+**Optimization options**:
+- Use Reserved Instances for 30% savings (~$31/month)
+- Right-size if low usage (t4g.micro: ~$10/month)
+- Consolidate to 2 instances if possible
+
+---
+
+## Next Steps
+
+1. Configure auto-scaling for application instances (optional)
+2. Setup read replicas for PostgreSQL (optional)
+3. Enable database replication for high availability (optional)
+4. Configure point-in-time recovery (PITR) for databases (optional)
+5. Setup monitoring alerts (Module 9)
 
 ---
 
 ## Kết Quả Đạt Được
 
-Sau Module 6:
+Sau Module 6, bạn sẽ có:
 
-1. All 4 EC2 instances verified & operational
-2. Database servers (PostgreSQL + MongoDB) tested
-3. Application servers (user-cessation + social-media) verified
-4. Inter-server connectivity confirmed
-5. Monitoring configured via CloudWatch
-6. Backup strategy implemented
-7. Security groups validated
-8. Cost optimization opportunities identified
-9. Ready for S3 & CloudFront verification (Module 7)
+1. ✅ 4 EC2 instances created & running
+2. ✅ Security groups configured with proper rules
+3. ✅ PostgreSQL server setup & database created
+4. ✅ MongoDB server setup & database created
+5. ✅ Application users created in both databases
+6. ✅ Database tables created & indexed
+7. ✅ Application server configuration completed
+8. ✅ Inter-instance connectivity tested
+9. ✅ CloudWatch monitoring enabled
+10. ✅ CloudWatch alarms configured
+11. ✅ Database backup scripts setup
+12. ✅ All databases operational & accessible
+13. ✅ Sẵn sàng cho Module 7 (Create S3 & CloudFront)
