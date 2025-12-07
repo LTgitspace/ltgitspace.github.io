@@ -5,122 +5,113 @@ weight: 1
 chapter: false
 pre: " <b> 3.1. </b> "
 ---
-{{% notice warning %}}
-⚠️ **Note:** The information below is for reference purposes only. Please **do not copy verbatim** for your report, including this warning.
-{{% /notice %}}
+Application Portfolio Rationalization using Generative AI with NorthBay Solutions
+by Sujit Singh, Robert Murphy, and Ed Chow on 31 MAR 2025 in AWS Partner Network, Migration, Migration Solutions, Partner solutions Permalink  Comments  Share
+By Sujit Singh, Partner Solutions Architect – AWS
+By Robert Murphy, VP Solutions & Services – NorthBay Solutions
+By Ed Chow, Director AI/ML – NorthBay Solutions
 
-# Getting Started with Healthcare Data Lakes: Using Microservices
+NorthBay-Solutions-AWS-Partners
+NorthBay Solutions
+NorthBay-Solutions-APN-Blog-CTA-Button-2025
+Migrating to the cloud is a complex process with numerous trade-offs and considerations requiring a strategic approach to mitigate risks and optimize outcomes. NorthBay Solutions’ Application Portfolio Rationalization (APR), powered by Generative AI (Gen AI), helps organizations assess their application inventory and decide whether to Refactor, Replatform, Rehost, Retain, Repurchase, Retire, or Relocate each application. However, traditional APR methods that rely on manual processes can be slow, costly, and prone to errors.
 
-Data lakes can help hospitals and healthcare facilities turn data into business insights, maintain business continuity, and protect patient privacy. A **data lake** is a centralized, managed, and secure repository to store all your data, both in its raw and processed forms for analysis. Data lakes allow you to break down data silos and combine different types of analytics to gain insights and make better business decisions.
+As an AWS Specialization Partner and AWS Marketplace Seller, NorthBay Solutions helps organizations leverage AWS to modernize their applications efficiently.
 
-This blog post is part of a larger series on getting started with setting up a healthcare data lake. In my final post of the series, *“Getting Started with Healthcare Data Lakes: Diving into Amazon Cognito”*, I focused on the specifics of using Amazon Cognito and Attribute Based Access Control (ABAC) to authenticate and authorize users in the healthcare data lake solution. In this blog, I detail how the solution evolved at a foundational level, including the design decisions I made and the additional features used. You can access the code samples for the solution in this Git repo for reference.
+In this post, we explore how NorthBay Solutions‘ Gen AI-powered APR solution streamlines the process, addressing key challenges and reduces costs.
 
----
+Challenges of Application Portfolio Rationalization
+APR presents several key challenges for enterprise organizations:
 
-## Architecture Guidance
+Complex Decision Making – Multiple factors must be considered for each application, such as functionality, technical debt, business value, and strategic alignment with organizational goals.
+Scale – Assessing hundreds or thousands of applications simultaneously creates complexity that overwhelms manual evaluation methods.
+Complex Dependencies – Larger portfolios make it harder to map and predict the impact of modernization.
+Incomplete Documentation – Outdated or missing records slow down assessment processes and increase decision risks.
+Knowledge Loss – Staff turnover leads to information gaps that affect decision quality.
+Cost Management – Prolonged evaluations strain modernization budgets and impact ROI calculations.
+NorthBay’s Generative AI APR Solution
+NorthBay’s Gen AI APR solution addresses the challenges of the complex APR process and helps enterprises optimize their IT portfolios by identifying redundant, costly, and inefficient applications. The solution uses Amazon Q Business, a fully managed Gen AI-powered assistant that can answer questions, provide summaries, generate content, and securely complete tasks based on data and information in your enterprise systems. The solution also uses Amazon Q connectors. Amazon Q Business offers multiple prebuilt connectors to a variety of data sources, including Atlassian Jira, Atlassian Confluence, Amazon S3, Microsoft SharePoint, Salesforce, and many more and can help you create your generative AI solution with minimal configuration. For a full list of Amazon Q supported data source connectors, see Amazon Q connectors.
 
-The main change since the last presentation of the overall architecture is the decomposition of a single service into a set of smaller services to improve maintainability and flexibility. Integrating a large volume of diverse healthcare data often requires specialized connectors for each format; by keeping them encapsulated separately as microservices, we can add, remove, and modify each connector without affecting the others. The microservices are loosely coupled via publish/subscribe messaging centered in what I call the “pub/sub hub.”
+Solution Architecture
+NorthBay’s APR Solution Architecture and Flow
 
-This solution represents what I would consider another reasonable sprint iteration from my last post. The scope is still limited to the ingestion and basic parsing of **HL7v2 messages** formatted in **Encoding Rules 7 (ER7)** through a REST interface.
+Figure 1. NorthBay’s APR Solution Architecture and Flow
 
-**The solution architecture is now as follows:**
+Components of NorthBay’s Gen AI APR Solution
+Amazon Q web application – A customized web application built on top of the Amazon Q Business API, designed with a look and feel aligned with your organization’s brand.
+AWS IAM Identity Center – Integrated with Amazon Q Business to provide centralized user authentication and access management. It can connect to your organization’s identity provider, such as Okta or Entra ID, via SSO. This makes sure that only authorized users can access the Amazon Q web application while leveraging IAM roles for secure permissions.
+Application Portfolio Management Tool – Users have the option to manually upload exports from their application inventory tools or create custom data source connectors to pull data directly if the tool provides an API.
+Amazon Q Business – Q Business supports connecting with your data sources both on the AWS cloud and externally.
+AWS Data Sources – Users can upload relevant application data to Amazon S3 or Amazon RDS for consumption by Amazon Q Business’ engine.
+External Data Sources – Amazon Q Business supports many external data sources that can contain relevant information that could support the APR process. Below are examples of external data sources that can support your APR process:
+Custom Data Connectors to Application Portfolio Management (APM) Tools : With custom data connectors, a direct connection to your existing APM tools can be established via API. Amazon Q can understand stakeholders, application investment, business capabilities, and redundancies to validate your rationalization process.
+Slack and Microsoft Teams : Offers insights from team discussions to understand the use and significance of various applications in your workflow.
+Microsoft SharePoint and Google Drive : Document management systems contain crucial documentation about application architecture, user guides, and process workflows, which Amazon Q can analyze to understand application functionality and interdependencies.
+Confluence : Integration provides access to detailed documentation, meeting notes, and project plans, giving Amazon Q context about application development and deployment.
+NorthBay’s Gen AI APR Solution Process Flow
+Amazon Q Business provides an intelligent, chat-based interface that aggregates data from multiple organizational sources. By leveraging Gen AI, the solution offers real-time insights into each application’s role and strategic value. The system works by:
 
-> *Figure 1. Overall architecture; colored boxes represent distinct services.*
+Pulling relevant data from defined organizational sources.
+Identifying key insights using Gen AI.
+Generating natural language responses to user queries.
+Enabling follow-up questions for deeper understanding.
+Let’s look at some example questions and responses using the solution with mock data designed for demonstration purposes. Your organization would have different data and different outcomes.
 
----
+Example 1 – Identify Applications for APR Based on Key Dimensions
+To start, we can ask the APR solution for a summary of applications that are prime candidates for rationalization using cost, dependencies, criticality and risk level as dimensions for justifying the recommendations.
 
-While the term *microservices* has some inherent ambiguity, certain traits are common:  
-- Small, autonomous, loosely coupled  
-- Reusable, communicating through well-defined interfaces  
-- Specialized to do one thing well  
-- Often implemented in an **event-driven architecture**
+APR Solution Rationalization Prompt and Response
 
-When determining where to draw boundaries between microservices, consider:  
-- **Intrinsic**: technology used, performance, reliability, scalability  
-- **Extrinsic**: dependent functionality, rate of change, reusability  
-- **Human**: team ownership, managing *cognitive load*
+Figure 2. APR Solution Rationalization Prompt and Response
 
----
+Amazon Q Business analyzes application data across multiple dimensions to generate strategic recommendations. In this example, the system identifies consolidation opportunities across different categories by evaluating application characteristics. For example:
 
-## Technology Choices and Communication Scope
+HR Application Consolidation
+Applications to Rationalize: TalentWare
+Cost: $350,000/year
+Criticality: Medium
+Risk: Medium
+Consolidation Potential: High due to overlapping features with TalentSync HCM and Nebula HCM Cloud
+CRM Consolidation
+Applications to Rationalize: LinkPoint CRM
+Cost: $120,000/year
+Criticality: Medium
+Risk: Low
+Consolidation Potential: High, as it has overlapping capabilities with HorizonConnect CRM. Consolidation would eliminate redundant CRM functionalities.
+These two applications have overlapping ERP and financial management capabilities. A detailed assessment could identify opportunities to consolidate functionality.
 
-| Communication scope                       | Technologies / patterns to consider                                                        |
-| ----------------------------------------- | ------------------------------------------------------------------------------------------ |
-| Within a single microservice              | Amazon Simple Queue Service (Amazon SQS), AWS Step Functions                               |
-| Between microservices in a single service | AWS CloudFormation cross-stack references, Amazon Simple Notification Service (Amazon SNS) |
-| Between services                          | Amazon EventBridge, AWS Cloud Map, Amazon API Gateway                                      |
+Example 2 – Identify Applications for APR Based on Overlapping Features
+Next, we can look for candidates for rationalization based on overlapping features only.
 
----
+APR Solution Overlapping Features Prompt and Response
 
-## The Pub/Sub Hub
+Figure 3. APR Solution Overlapping Features Prompt and Response
 
-Using a **hub-and-spoke** architecture (or message broker) works well with a small number of tightly related microservices.  
-- Each microservice depends only on the *hub*  
-- Inter-microservice connections are limited to the contents of the published message  
-- Reduces the number of synchronous calls since pub/sub is a one-way asynchronous *push*
+Amazon Q Business identifies multiple candidate applications for rationalization based on overlapping features only. For example, for ERP/Finance Systems it is recommended to
 
-Drawback: **coordination and monitoring** are needed to avoid microservices processing the wrong message.
+conduct detailed assessment to potentially consolidate OmniCore Suite and NexusFlow ERP as they have significant overlapping capabilities in ERP, financials, and supply chain management.
 
----
+Example 3 – Identify Applications for APR Based on Criticality and Annual Cost
+In the final example, we compare the criticality of each application against its annual cost. The objective is to identify applications that are high-cost but low criticality as candidates for meeting cost-saving goals.
 
-## Core Microservice
+APR Solution Criticality Prompt and Response
 
-Provides foundational data and communication layer, including:  
-- **Amazon S3** bucket for data  
-- **Amazon DynamoDB** for data catalog  
-- **AWS Lambda** to write messages into the data lake and catalog  
-- **Amazon SNS** topic as the *hub*  
-- **Amazon S3** bucket for artifacts such as Lambda code
+Figure 4. APR Solution Criticality Prompt and Response
 
-> Only allow indirect write access to the data lake through a Lambda function → ensures consistency.
+In this example, Amazon Q Business identifies multiple candidate applications for rationalization based on their criticality versus annual cost. For example:
 
----
+TalentWave is a high-cost application with no strategic fit. It has overlapping features with TalentSync HCM, VitalThrive, and Nebula HCM Cloud. Therefore, it is recommended to decommission it and consolidate functionality into existing HR applications for potential savings of $350,000.
 
-## Front Door Microservice
+Benefits of a Gen AI APR Solution
+A successful APR yields several key outcomes that significantly benefit the organization and accelerates your migration onto the AWS cloud:
 
-- Provides an API Gateway for external REST interaction  
-- Authentication & authorization based on **OIDC** via **Amazon Cognito**  
-- Self-managed *deduplication* mechanism using DynamoDB instead of SNS FIFO because:  
-  1. SNS deduplication TTL is only 5 minutes  
-  2. SNS FIFO requires SQS FIFO  
-  3. Ability to proactively notify the sender that the message is a duplicate  
+Optimized Application Portfolio: By thoroughly evaluating and categorizing each application, a successful APR makes sure that your application portfolio is streamlined and aligned with your business objectives. This includes retaining high-value applications, modernizing those with potential, and sunsetting obsolete or redundant ones. The result is a leaner, more cost-effective set of applications that better serve your business needs.
+Enhanced Agility and Performance: A rationalized application portfolio is easier to manage and more responsive to changing business demands. Modernized applications typically perform better, are more scalable, and offer improved security and compliance features. This enhanced agility enables your IT department to support business innovation and growth more effectively.
+Informed Decision-Making: A successful APR process provides detailed insights and documentation about your application landscape. This information is invaluable for strategic planning and decision-making, enabling IT leaders to make informed choices about future investments and initiatives.
+Improved Risk Management: By identifying and addressing technical debt and security vulnerabilities in outdated applications, a successful APR helps mitigate risks associated with legacy systems. This proactive approach to risk management enhances overall system reliability and security.
+These outcomes collectively drive business value, positioning the organization for future success and innovation.
 
----
+Conclusion
+In this post we showed how NorthBay’s APR Solution enables organizations to efficiently manage their application portfolios by leveraging Gen AI provided by Amazon Q Business.
 
-## Staging ER7 Microservice
-
-- Lambda “trigger” subscribed to the pub/sub hub, filtering messages by attribute  
-- Step Functions Express Workflow to convert ER7 → JSON  
-- Two Lambdas:  
-  1. Fix ER7 formatting (newline, carriage return)  
-  2. Parsing logic  
-- Result or error is pushed back into the pub/sub hub  
-
----
-
-## New Features in the Solution
-
-### 1. AWS CloudFormation Cross-Stack References
-Example *outputs* in the core microservice:
-```yaml
-Outputs:
-  Bucket:
-    Value: !Ref Bucket
-    Export:
-      Name: !Sub ${AWS::StackName}-Bucket
-  ArtifactBucket:
-    Value: !Ref ArtifactBucket
-    Export:
-      Name: !Sub ${AWS::StackName}-ArtifactBucket
-  Topic:
-    Value: !Ref Topic
-    Export:
-      Name: !Sub ${AWS::StackName}-Topic
-  Catalog:
-    Value: !Ref Catalog
-    Export:
-      Name: !Sub ${AWS::StackName}-Catalog
-  CatalogArn:
-    Value: !GetAtt Catalog.Arn
-    Export:
-      Name: !Sub ${AWS::StackName}-CatalogArn
+Get started with NorthBay’s Generative AI APR Solution by subscribing to it on the AWS Marketplace and achieve the business objectives for your organization.
