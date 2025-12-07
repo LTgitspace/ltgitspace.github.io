@@ -1,195 +1,411 @@
-# Module 8: Verify VPC & Security Configuration
+# Module 8: Create VPC, Subnets, Security Groups & NLB
 
 ## Mục tiêu Module
 
-- Verify VPC setup
-- Review Security Groups configuration
-- Verify Network ACLs
-- Configure NLB for WebSocket
-- Setup VPN/Bastion (optional)
-- Review IAM policies
+- Tạo VPC mới từ đầu
+- Tạo public & private subnets
+- Cấu hình Internet Gateway & NAT Gateway
+- Tạo 3 Security Groups
+- Tạo Network Load Balancer (NLB) cho WebSocket
+- Cấu hình IAM policies
+- Setup VPC Flow Logs & security monitoring
+
+**Duration**: 4-5 giờ
 
 ---
 
-## Phần 1: Verify VPC
+## VPC & Network Overview
 
-### Status Hiện Tại
+VPC architecture sẽ được tạo ở ap-southeast-1:
 
-VPC:
-- ID: vpc-046dc916dde2fb93f
-- Name: project-bundau-milo
-- CIDR: 172.0.0.0/18
-- Region: ap-southeast-1
+```
+VPC: smoking-cessation-vpc (172.0.0.0/16)
+├── Public Subnets (Internet-facing)
+│   ├── ap-southeast-1a: 172.0.0.0/24
+│   └── ap-southeast-1b: 172.0.1.0/24
+├── Private Subnets (Database & Lambda)
+│   ├── ap-southeast-1a: 172.0.10.0/24
+│   ├── ap-southeast-1b: 172.0.11.0/24
+│   └── ap-southeast-1c: 172.0.12.0/24
+├── Internet Gateway: smoking-igw
+├── NAT Gateway: smoking-nat (in public subnet)
+├── NLB: smoking-nlb (WebSocket endpoint)
+└── 3 Security Groups:
+    ├── smoking-nlb-sg (NLB)
+    ├── smoking-app-sg (EC2 Applications)
+    └── smoking-db-sg (EC2 Databases)
+```
+
+---
+
+## Phần 1: Create VPC
 
 ### Bước 1: Truy cập VPC Console
 
-1. VPC service
-2. Click "VPCs"
-3. Click vào "project-bundau-milo"
+1. Login vào AWS Console
+2. Tìm kiếm "VPC"
+3. Click "VPC" service
+4. Chọn region: **ap-southeast-1**
+5. Click "Create VPC"
 
-![VPC Dashboard](../assets/08-vpc-dashboard.png)
+![VPC Console](../assets/08-vpc-console.png)
 
-### Bước 2: Review Subnets
+### Bước 2: Configure VPC Details
 
-1. Click "Subnets" (left menu)
-2. Verify:
-   - Public subnets (for ALB/NLB)
-   - Private subnets (for Lambda, RDS)
-   - Availability Zones (2-3 for HA)
+1. **Name tag**: `smoking-cessation-vpc`
+2. **IPv4 CIDR block**: `172.0.0.0/16`
+   - Đủ lớn cho tất cả subnets (65,536 addresses)
+3. **IPv6 CIDR block**: Leave empty
+4. **Tenancy**: Default
+5. Click "Create VPC"
 
-Expected structure:
-```
-Public Subnets (route to Internet Gateway)
-├── ap-southeast-1a: 172.0.0.0/24
-└── ap-southeast-1b: 172.0.1.0/24
+⏳ **Chờ VPC được tạo (vài giây)**
 
-Private Subnets (route via NAT Gateway)
-├── ap-southeast-1a: 172.0.10.0/24
-├── ap-southeast-1b: 172.0.11.0/24
-└── ap-southeast-1c: 172.0.12.0/24
-```
+![VPC Created](../assets/08-vpc-created.png)
 
-![Subnets](../assets/08-vpc-subnets.png)
+### Bước 3: Note VPC Details
 
-### Bước 3: Review Internet Gateway
-
-1. Click "Internet Gateways" (left menu)
-2. Verify IGW attached to VPC
-3. Should see route in public subnet:
-   - Destination: 0.0.0.0/0
-   - Target: Internet Gateway
-
-### Bước 4: Review NAT Gateway (for private subnets)
-
-1. Click "NAT Gateways" (left menu)
-2. Verify NAT Gateway in public subnet
-3. Check Elastic IP assigned
-4. Verify route in private subnets:
-   - Destination: 0.0.0.0/0
-   - Target: NAT Gateway
+Sau khi tạo, note:
+- **VPC ID**: (e.g., vpc-049ff1c1372e1f3b8)
+- **VPC CIDR**: 172.0.0.0/16
 
 ---
 
-## Phần 2: Verify Security Groups
+## Phần 2: Create Internet Gateway
 
-### Security Groups Hiện Tại
+### Bước 1: Create IGW
 
-| Group ID | Name | VPC | Purpose |
-|----------|------|-----|---------|
-| sg-0cf34158cb7f5440b | leaflungs-backend-sg | project-bundau-milo | EC2 Application servers + Lambda |
-| sg-0adb5d7ea1fe0f6bb | leaflungs-nlb-sg | project-bundau-milo | NLB (WebSocket) |
-| sg-027ef04aa3c769ecf | leaflungs-db-sg | project-bundau-milo | EC2 Database servers (PostgreSQL + MongoDB) |
+1. VPC Console
+2. Left menu: "Internet Gateways"
+3. Click "Create Internet gateway"
+4. **Name**: `smoking-igw`
+5. Click "Create internet gateway"
 
-### Bước 1: Review leaflungs-backend-sg
+⏳ **Chờ IGW được tạo**
 
-1. VPC → Security Groups
-2. Click "leaflungs-backend-sg"
+### Bước 2: Attach IGW to VPC
 
-Inbound rules (should have):
-```
-HTTPS (443) from leaflungs-nlb-sg
-MySQL/PostgreSQL (3306/5432) to leaflungs-db-sg
-```
+1. Click vào IGW vừa tạo
+2. Click "Attach to VPC"
+3. Select VPC: `smoking-cessation-vpc`
+4. Click "Attach internet gateway"
 
-Outbound rules:
-```
-All traffic (0.0.0.0/0)
-```
-
-### Bước 2: Review leaflungs-nlb-sg
-
-Inbound rules (should have):
-```
-HTTPS (443) from 0.0.0.0/0 (allow all)
-```
-
-Outbound rules:
-```
-All traffic to leaflungs-backend-sg
-```
-
-### Bước 3: Review leaflungs-db-sg
-
-Inbound rules (should have):
-```
-PostgreSQL/MySQL (5432/3306) from leaflungs-backend-sg
-PostgreSQL/MySQL (5432/3306) from leaflungs-nlb-sg (if needed)
-```
-
-Outbound rules:
-```
-All traffic (default)
-```
+![IGW Attached](../assets/08-igw-attached.png)
 
 ---
 
-## Phần 3: Verify NLB Configuration
+## Phần 3: Create Subnets
 
-### NLB Status
+### Bước 1: Create Public Subnet 1a
 
-Name: leaflungs-userinfo-nlb
-Type: Network Load Balancer
-Status: Active
-Purpose: WebSocket endpoint for chat
+1. VPC Console
+2. Left menu: "Subnets"
+3. Click "Create subnet"
+4. **VPC ID**: `smoking-cessation-vpc`
+5. **Subnet name**: `smoking-public-1a`
+6. **Availability Zone**: **ap-southeast-1a**
+7. **IPv4 CIDR block**: `172.0.0.0/24`
+8. Click "Create subnet"
 
-### Bước 1: Verify NLB Details
+### Bước 2: Create Public Subnet 1b
 
-1. EC2 → Load Balancers
-2. Click "leaflungs-userinfo-nlb"
+1. Click "Create subnet"
+2. **Subnet name**: `smoking-public-1b`
+3. **Availability Zone**: **ap-southeast-1b**
+4. **IPv4 CIDR block**: `172.0.1.0/24`
+5. Click "Create subnet"
 
-Check:
-- Scheme: Internal hoặc Internet-facing
-- IP address type: IPv4
-- VPC: project-bundau-milo
-- Subnets: 2-3 public subnets
+### Bước 3: Create Private Subnet 1a
 
-![NLB Configuration](../assets/06-nlb-configuration.png)
+1. Click "Create subnet"
+2. **Subnet name**: `smoking-private-1a`
+3. **Availability Zone**: **ap-southeast-1a**
+4. **IPv4 CIDR block**: `172.0.10.0/24`
+5. Click "Create subnet"
 
-### Bước 2: Verify Target Groups
+### Bước 4: Create Private Subnet 1b
 
-1. Click "Target groups" (left menu)
-2. Check targets:
-   - Type: IP hoặc Instance
-   - Port: 80 hoặc 443
-   - Health check: Enabled
+1. Click "Create subnet"
+2. **Subnet name**: `smoking-private-1b`
+3. **Availability Zone**: **ap-southeast-1b**
+4. **IPv4 CIDR block**: `172.0.11.0/24`
+5. Click "Create subnet"
 
-### Bước 3: Configure SSL/TLS (if HTTPS)
+### Bước 5: Create Private Subnet 1c
 
-1. Listeners tab
-2. For HTTPS (443):
-   - Protocol: TLS
-   - Port: 443
-   - Certificate: ACM certificate
-   - SSL policy: ELBSecurityPolicy-TLS-1-2-2017-01
+1. Click "Create subnet"
+2. **Subnet name**: `smoking-private-1c`
+3. **Availability Zone**: **ap-southeast-1c**
+4. **IPv4 CIDR block**: `172.0.12.0/24`
+5. Click "Create subnet"
 
-![NLB Listeners](../assets/06-nlb-listeners.png)
+**Result**: 5 subnets created (2 public + 3 private)
 
----
-
-## Phần 4: Network ACLs (Optional Advanced)
-
-### Bước 1: Review NACLs
-
-1. VPC → Network ACLs
-2. Select NACL for each subnet
-3. Check inbound/outbound rules
-
-Default should allow all traffic (you can restrict if needed)
+![Subnets Created](../assets/08-subnets-created.png)
 
 ---
 
-## Phần 5: IAM Policies Review
+## Phần 4: Create & Configure Route Tables
 
-### Bước 1: Review Lambda Execution Roles
+### Bước 1: Create Public Route Table
 
-For each role, check:
-- CloudWatch logs access
-- RDS database access
-- S3 access (if needed)
-- VPC access (for RDS)
-- Secrets Manager access
+1. Left menu: "Route tables"
+2. Click "Create route table"
+3. **Name**: `smoking-public-rt`
+4. **VPC**: `smoking-cessation-vpc`
+5. Click "Create route table"
 
-Example policy for Lambda with RDS:
+### Bước 2: Add Internet Gateway Route to Public RT
+
+1. Click vào public route table
+2. "Routes" tab → "Edit routes"
+3. Click "Add route"
+4. **Destination**: `0.0.0.0/0`
+5. **Target**: Internet Gateway → `smoking-igw`
+6. Click "Save routes"
+
+### Bước 3: Associate Public RT with Public Subnets
+
+1. "Subnet associations" tab → "Edit subnet associations"
+2. Select:
+   - `smoking-public-1a`
+   - `smoking-public-1b`
+3. Click "Save associations"
+
+### Bước 4: Create Private Route Table
+
+1. Click "Create route table"
+2. **Name**: `smoking-private-rt`
+3. **VPC**: `smoking-cessation-vpc`
+4. Click "Create route table"
+
+### Bước 5: Associate Private RT with Private Subnets
+
+1. Click vào private route table
+2. "Subnet associations" → "Edit subnet associations"
+3. Select:
+   - `smoking-private-1a`
+   - `smoking-private-1b`
+   - `smoking-private-1c`
+4. Click "Save associations"
+
+**Note**: Private subnets route traffic via NAT Gateway (will configure after NAT is created)
+
+---
+
+## Phần 5: Create NAT Gateway
+
+### Bước 1: Create Elastic IP for NAT
+
+1. Left menu: "Elastic IPs"
+2. Click "Allocate Elastic IP address"
+3. **Region**: ap-southeast-1
+4. Click "Allocate"
+5. Note the Elastic IP address
+
+### Bước 2: Create NAT Gateway
+
+1. Left menu: "NAT Gateways"
+2. Click "Create NAT gateway"
+3. **Name**: `smoking-nat`
+4. **Subnet**: `smoking-public-1a` (place in public subnet)
+5. **Elastic IP allocation ID**: Select the IP created in Bước 1
+6. Click "Create NAT gateway"
+
+⏳ **Chờ NAT Gateway được tạo (1-2 phút)**
+
+### Bước 3: Add NAT Gateway Route to Private RT
+
+1. Go to "Route tables"
+2. Click private route table: `smoking-private-rt`
+3. "Routes" tab → "Edit routes"
+4. Click "Add route"
+5. **Destination**: `0.0.0.0/0`
+6. **Target**: NAT Gateway → `smoking-nat`
+7. Click "Save routes"
+
+Now private subnets can reach internet via NAT Gateway.
+
+![NAT Gateway Created](../assets/08-nat-gateway.png)
+
+---
+
+## Phần 6: Create Security Groups
+
+### Bước 1: Create NLB Security Group
+
+1. Left menu: "Security Groups"
+2. Click "Create security group"
+3. **Name**: `smoking-nlb-sg`
+4. **Description**: Security group for Network Load Balancer
+5. **VPC**: `smoking-cessation-vpc`
+6. Click "Create security group"
+
+#### Add Inbound Rules:
+1. Click vào SG vừa tạo
+2. "Inbound rules" → "Edit inbound rules"
+3. Add rules:
+   - **Type**: HTTPS (443)
+     - **Source**: `0.0.0.0/0` (allow all for WebSocket)
+   - **Type**: HTTP (80)
+     - **Source**: `0.0.0.0/0` (for redirect to HTTPS)
+4. Click "Save rules"
+
+#### Outbound Rules:
+- Default allows all traffic ✅
+
+### Bước 2: Create Application Security Group
+
+1. Click "Create security group"
+2. **Name**: `smoking-app-sg`
+3. **Description**: Security group for application servers
+4. **VPC**: `smoking-cessation-vpc`
+5. Click "Create security group"
+
+#### Add Inbound Rules:
+1. "Inbound rules" → "Edit inbound rules"
+2. Add rules:
+   - **Type**: Custom TCP 8000
+     - **Source**: `smoking-nlb-sg` (allow from NLB)
+   - **Type**: Custom TCP 22 (SSH)
+     - **Source**: My IP or `0.0.0.0/0` (for admin access)
+3. Click "Save rules"
+
+#### Outbound Rules:
+- Allow all traffic to private subnets & databases
+
+### Bước 3: Create Database Security Group
+
+1. Click "Create security group"
+2. **Name**: `smoking-db-sg`
+3. **Description**: Security group for database servers
+4. **VPC**: `smoking-cessation-vpc`
+5. Click "Create security group"
+
+#### Add Inbound Rules:
+1. "Inbound rules" → "Edit inbound rules"
+2. Add rules:
+   - **Type**: PostgreSQL (5432)
+     - **Source**: `smoking-app-sg` (allow from app servers)
+   - **Type**: Custom TCP 27017 (MongoDB)
+     - **Source**: `smoking-app-sg` (allow from app servers)
+3. Click "Save rules"
+
+#### Outbound Rules:
+- Default allows all ✅
+
+**Result**: 3 security groups created with proper rules
+
+![Security Groups Created](../assets/08-sg-created.png)
+
+---
+
+  ## Phần 7: Create Network Load Balancer
+
+  ### Bước 1: Go to Load Balancers
+
+  1. Left menu: "Load Balancers" (under EC2)
+  2. Click "Create load balancer"
+  3. Select **Network Load Balancer**
+  4. Click "Create"
+  
+  ### Bước 2: Configure NLB Basic Settings
+
+  1. **Name**: `smoking-nlb`
+  2. **Scheme**: **Internet-facing** (accessible from internet)
+  3. **IP address type**: IPv4
+  4. **VPC**: `smoking-cessation-vpc`
+  5. **Subnets**:
+    - Select both public subnets: `smoking-public-1a`, `smoking-public-1b`
+  6. Click "Next"
+
+  ### Bước 3: Configure Security Groups
+
+  1. **Security groups**: Select `smoking-nlb-sg`
+  2. Click "Next"
+
+  ### Bước 4: Configure Listeners and Routing
+
+  1. **Protocol**: TCP
+  2. **Port**: 443 (HTTPS for WebSocket)
+  3. **Default action**: Forward to target group
+  4. Click "Create target group"
+
+  #### Create Target Group:
+  1. **Name**: `smoking-ws-targets`
+  2. **Protocol**: TCP
+  3. **Port**: 8000 (where apps listen)
+  4. **VPC**: `smoking-cessation-vpc`
+  5. **Health check**:
+    - **Protocol**: TCP
+    - **Port**: 8000
+    - **Interval**: 30 seconds
+    - **Healthy threshold**: 2
+  6. Click "Create"
+
+  ### Bước 5: Register Targets
+
+  1. After target group created, add targets:
+    - Application instances (smoking-app-user, smoking-app-social)
+    - **Port**: 8000
+  2. Click "Register targets"
+
+  ### Bước 6: Review & Create
+
+  1. Review all settings
+  2. Click "Create load balancer"
+
+  ⏳ **Chờ NLB được tạo & deployed (3-5 phút)**
+
+  Note the **NLB DNS name**: (e.g., smoking-nlb-123456.elb.ap-southeast-1.amazonaws.com)
+
+  ![NLB Created](../assets/08-nlb-created.png)
+
+---
+
+## Phần 8: Configure NLB with HTTPS/TLS (Optional)
+
+### Bước 1: Request ACM Certificate
+
+1. Tìm kiếm "ACM" (Certificate Manager)
+2. Click "Request certificate"
+3. **Domain names**:
+   - `yourdomain.com` (if custom domain)
+   - Or use NLB DNS name
+4. **Validation method**: DNS
+5. Click "Request"
+
+### Bước 2: Create HTTPS Listener
+
+1. Go to NLB
+2. "Listeners" tab → "Add listener"
+3. **Protocol**: TLS
+4. **Port**: 443
+5. **Default action**: Forward to target group `smoking-ws-targets`
+6. **SSL certificate**: Select ACM certificate
+7. Click "Add"
+
+### Bước 3: Create HTTP → HTTPS Redirect (Optional)
+
+1. Add another listener:
+   - **Protocol**: TCP
+   - **Port**: 80
+2. **Default action**: Redirect to port 443 (HTTPS)
+
+---
+
+## Phần 9: Configure IAM Policies for Lambda VPC Access
+
+### Bước 1: Update Lambda Execution Role
+
+Lambda functions kết nối database cần IAM permissions:
+
+1. Go to IAM Console
+2. Click "Roles"
+3. Click `smoking-cessation-lambda-role`
+4. Click "Add permissions" → "Create inline policy"
+5. Select "JSON" tab
+6. Paste policy:
 
 ```json
 {
@@ -198,139 +414,276 @@ Example policy for Lambda with RDS:
     {
       "Effect": "Allow",
       "Action": [
-        "logs:CreateLogGroup",
-        "logs:CreateLogStream",
-        "logs:PutLogEvents"
-      ],
-      "Resource": "arn:aws:logs:ap-southeast-1:140570829989:*"
-    },
-    {
-      "Effect": "Allow",
-      "Action": [
         "ec2:CreateNetworkInterface",
         "ec2:DescribeNetworkInterfaces",
-        "ec2:DeleteNetworkInterface"
+        "ec2:DeleteNetworkInterface",
+        "ec2:AssignPrivateIpAddresses",
+        "ec2:UnassignPrivateIpAddresses"
       ],
       "Resource": "*"
     },
     {
       "Effect": "Allow",
-      "Action": "rds-db:connect",
-      "Resource": "arn:aws:rds:ap-southeast-1:140570829989:db:smoking-cessation-db"
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+      ],
+      "Resource": "arn:aws:logs:ap-southeast-1:*:*"
     },
     {
       "Effect": "Allow",
       "Action": [
         "secretsmanager:GetSecretValue"
       ],
-      "Resource": "arn:aws:secretsmanager:ap-southeast-1:140570829989:secret:smoking-cessation/*"
+      "Resource": "arn:aws:secretsmanager:ap-southeast-1:*:secret:smoking-cessation/*"
     }
   ]
 }
 ```
 
-### Bước 2: Review Cognito IAM Roles
+7. Click "Review policy"
+8. **Policy name**: `lambda-vpc-policy`
+9. Click "Create policy"
 
-Verify Cognito has permission to invoke Lambda triggers
+### Bước 2: Configure Lambda Functions for VPC
 
----
+For each Lambda function that accesses databases:
 
-## Phần 6: Security Best Practices
+1. Go to Lambda Console
+2. Click function name
+3. Click "Configuration" tab
+4. Click "VPC"
+5. Click "Edit"
+6. **VPC**: `smoking-cessation-vpc`
+7. **Subnets**: Select private subnets
+   - `smoking-private-1a`
+   - `smoking-private-1b`
+8. **Security groups**: `smoking-app-sg`
+9. Click "Save"
 
-### 1. Disable Public RDS Access
-
-Verify:
-1. RDS → DB instances
-2. "smoking-cessation-db"
-3. Publicly accessible: No
-
-### 2. Enable VPC Flow Logs (Recommended)
-
-To monitor network traffic:
-
-```bash
-aws ec2 create-flow-logs \
-  --resource-type VPC \
-  --resource-ids vpc-046dc916dde2fb93f \
-  --traffic-type ALL \
-  --log-destination-type cloud-watch-logs \
-  --log-group-name vpc-flow-logs \
-  --deliver-logs-permission-role-arn arn:aws:iam::140570829989:role/flowlogsRole \
-  --region ap-southeast-1
-```
-
-### 3. Enable GuardDuty (Threat Detection)
-
-```bash
-aws guardduty create-detector \
-  --enable \
-  --region ap-southeast-1
-```
-
-### 4. Enable Security Hub (Optional)
-
-1. Security Hub Console
-2. Click "Enable Security Hub"
-3. Select standards:
-   - AWS Foundational Security Best Practices
-   - CIS AWS Foundations Benchmark
+This allows Lambda to access EC2 database instances.
 
 ---
 
-## Phần 7: VPN Setup (Optional)
+## Phần 10: Setup VPC Flow Logs
 
-If need remote access to private resources:
+### Bước 1: Enable VPC Flow Logs
 
-### Bước 1: Create VPN Connection
+1. Go to VPC Console
+2. Click "VPCs"
+3. Select `smoking-cessation-vpc`
+4. Click "Flow logs" tab
+5. Click "Create flow log"
 
-1. VPC → Virtual Private Network (VPN)
-2. Click "Create VPN connection"
-3. Type: Site-to-Site VPN
-4. Target Gateway: VPC
-5. Customer Gateway: Your network gateway
+### Bước 2: Configure Flow Logs
 
-### Bước 2: Download VPN Configuration
+1. **Name**: `smoking-vpc-flow-logs`
+2. **Traffic type**: All (capture all traffic)
+3. **Log destination**: CloudWatch Logs
+4. **Log group name**: `/aws/vpc/smoking-cessation-vpc`
+5. **IAM role**: Create new role
+   - Role name: `vpc-flow-logs-role`
+6. Click "Create flow log"
 
-Download configuration file and configure your VPN client
+⏳ **Chờ flow logs được enabled**
+
+Now all VPC traffic will be logged to CloudWatch!
+
+---
+
+## Phần 11: Enable GuardDuty (Threat Detection)
+
+### Bước 1: Enable GuardDuty
+
+1. Tìm kiếm "GuardDuty"
+2. Click "GuardDuty" service
+3. Click "Enable GuardDuty"
+4. Read and confirm disclaimer
+5. Click "Enable GuardDuty"
+
+⏳ **Chờ GuardDuty được enabled (vài phút)**
+
+GuardDuty will analyze VPC Flow Logs for threats.
+
+---
+
+## Phần 12: Test Network Connectivity
+
+### Bước 1: Test Public Subnet Connectivity
+
+From an EC2 instance in public subnet:
+
+```bash
+# Test internet connectivity
+ping 8.8.8.8
+
+# Check routing table
+route -n
+
+# Should see:
+# Destination        Gateway
+# 172.0.0.0/16       0.0.0.0 (local)
+# 0.0.0.0/0          Internet Gateway
+```
+
+### Bước 2: Test Private Subnet Connectivity
+
+From an EC2 instance in private subnet:
+
+```bash
+# Test NAT Gateway (internet via NAT)
+curl https://ip.nslookup.com
+
+# Test database connectivity
+psql -h <DB_IP> -U postgres -d smoking_cessation
+
+# Test MongoDB
+mongosh --host <MONGO_IP>:27017
+```
+
+### Bước 3: Test Security Group Rules
+
+```bash
+# From app server, test database access
+nc -zv <POSTGRES_IP> 5432  # Should be successful
+nc -zv <MONGO_IP> 27017    # Should be successful
+
+# From internet, try SSH to app server
+ssh -i key.pem ec2-user@<NLB_DNS>  # May timeout (not open for SSH)
+```
+
+---
+
+## Environment Variables & Networking Info
+
+Save these for future use:
+
+```env
+# VPC
+VPC_ID=vpc-046dc916dde2fb93f
+VPC_CIDR=172.0.0.0/16
+
+# Subnets
+PUBLIC_SUBNET_1A=subnet-xxx
+PUBLIC_SUBNET_1B=subnet-xxx
+PRIVATE_SUBNET_1A=subnet-xxx
+PRIVATE_SUBNET_1B=subnet-xxx
+PRIVATE_SUBNET_1C=subnet-xxx
+
+# Gateways
+IGW_ID=igw-xxx
+NAT_EIP=<elastic-ip>
+NAT_GW_ID=nat-xxx
+
+# Security Groups
+NLB_SG_ID=sg-xxx
+APP_SG_ID=sg-xxx
+DB_SG_ID=sg-xxx
+
+# Load Balancer
+NLB_DNS=smoking-nlb-123456.elb.ap-southeast-1.amazonaws.com
+NLB_ARN=arn:aws:elasticloadbalancing:ap-southeast-1:xxx
+```
 
 ---
 
 ## Checklist
 
-- [ ] VPC "project-bundau-milo" verified
-- [ ] Subnets configured (public & private)
-- [ ] Internet Gateway attached
-- [ ] NAT Gateway configured
-- [ ] All 3 Security Groups reviewed & configured
-- [ ] NLB verified & operational
-- [ ] SSL/TLS certificate for NLB configured
-- [ ] IAM roles have proper permissions
-- [ ] RDS not publicly accessible
-- [ ] VPC Flow Logs enabled (optional)
-- [ ] GuardDuty enabled (optional)
-- [ ] Security Hub enabled (optional)
-- [ ] Ready for Module 9 (Monitoring & Logging)
+- [ ] VPC created (smoking-cessation-vpc)
+- [ ] 5 subnets created (2 public + 3 private)
+- [ ] Internet Gateway created & attached
+- [ ] Public route table created & configured
+- [ ] NAT Gateway created
+- [ ] Private route table created & configured with NAT
+- [ ] 3 Security Groups created (NLB, App, DB)
+- [ ] Security Group rules configured
+- [ ] Network Load Balancer created
+- [ ] Target group configured with health checks
+- [ ] Application targets registered with NLB
+- [ ] HTTPS/TLS listener configured (optional)
+- [ ] Lambda functions configured for VPC access
+- [ ] Lambda IAM policy updated
+- [ ] VPC Flow Logs enabled
+- [ ] GuardDuty enabled
+- [ ] Network connectivity tested
+- [ ] Database access from apps verified
+- [ ] Sẵn sàng cho Module 9 (CloudWatch Monitoring)
 
 ---
 
-## Notes
+## Troubleshooting
 
-- VPC isolation critical for security
-- Security Groups are stateful (return traffic allowed automatically)
-- Network ACLs are stateless (need explicit return rules)
-- NLB better than ALB for WebSocket (lower latency)
-- IAM follows least-privilege principle
+### Instances Cannot Access Internet
+
+**Issue**: Private subnet instance cannot reach internet
+
+**Solution**:
+1. Verify NAT Gateway is running (not failed)
+2. Check private route table has NAT route: `0.0.0.0/0 → NAT Gateway`
+3. Verify Elastic IP is allocated
+4. Check security group outbound rules
+
+### Lambda Cannot Connect to Database
+
+**Issue**: Lambda timeout when connecting to database
+
+**Solution**:
+1. Verify Lambda is in VPC with private subnets
+2. Check database security group allows inbound from app SG
+3. Verify database instances have correct SG
+4. Test from EC2 instance first to isolate issue
+5. Check database is actually running
+
+### NLB Health Checks Failing
+
+**Issue**: Target instances marked unhealthy
+
+**Solution**:
+1. Verify target group health check port: 8000
+2. Verify application listening on port 8000
+3. Check security group (NLB-SG → App-SG) allows traffic
+4. SSH to instance and test: `curl http://localhost:8000/health`
+5. Check application logs for errors
+
+---
+
+## Cost Analysis
+
+**VPC costs** (mostly free, some charges):
+- VPC: Free
+- Subnets: Free
+- IGW: Free
+- NAT Gateway: ~$32/month (data processing charge)
+- NLB: ~$16/month (hourly) + $0.006 per LCU
+- VPC Flow Logs: ~$5/month (CloudWatch Logs storage)
+- **Total: ~$50-60/month**
+
+---
+
+## Next Steps
+
+1. Connect EC2 instances to NLB targets
+2. Setup auto-scaling groups (optional)
+3. Configure CloudFront to front NLB (optional)
+4. Setup WAF for NLB (optional)
+5. Monitor with CloudWatch (Module 9)
 
 ---
 
 ## Kết Quả Đạt Được
 
-Sau Module 8:
+Sau Module 8, bạn sẽ có:
 
-1. VPC fully verified & optimized
-2. Security Groups properly configured
-3. NLB operational for WebSocket
-4. IAM roles with proper permissions
-5. Network traffic isolated
-6. Advanced security features enabled
-7. Ready for Monitoring & Logging (Module 9)
+1. ✅ VPC created với CIDR 172.0.0.0/16
+2. ✅ 5 subnets (2 public + 3 private)
+3. ✅ Internet Gateway attached
+4. ✅ NAT Gateway for private subnet internet access
+5. ✅ Public & private route tables configured
+6. ✅ 3 Security Groups with proper rules
+7. ✅ Network Load Balancer operational
+8. ✅ Lambda functions integrated with VPC
+9. ✅ VPC Flow Logs capturing all traffic
+10. ✅ GuardDuty monitoring for threats
+11. ✅ Network security fully configured
+12. ✅ Sẵn sàng cho Module 9 (CloudWatch Monitoring & Alarms)
