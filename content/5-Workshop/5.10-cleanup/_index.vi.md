@@ -15,38 +15,28 @@
 
 ### Current AWS Resources
 
-List tất cả resources từ AWS Console:
+Run commands để list tất cả resources:
 
-**Lambda Functions:**
-- Go to Lambda console
-- List functions in each region (us-east-1, ap-southeast-1)
-- Note: Function names, creation dates, memory allocation
+```bash
+# List all Lambda functions
+aws lambda list-functions --region us-east-1 --output json
+aws lambda list-functions --region ap-southeast-1 --output json
 
-**API Gateways:**
-- Go to API Gateway console
-- List all REST APIs in ap-southeast-1
-- Note: API names, deployment status
+# List all API Gateways
+aws apigateway get-rest-apis --region ap-southeast-1 --output json
 
-**EC2 Database Instances:**
-- Go to EC2 console
-- List all instances in ap-southeast-1
-- Filter for database instances (DB-PG, DB-Mongo)
-- Note: Instance IDs, instance types, IPs, creation dates
+# List all RDS instances
+aws rds describe-db-instances --region ap-southeast-1 --output json
 
-**S3 Buckets:**
-- Go to S3 console
-- List all buckets
-- Note: Bucket names, creation dates, storage used
+# List all S3 buckets
+aws s3api list-buckets --output json
 
-**CloudFront Distributions:**
-- Go to CloudFront console
-- List all distributions
-- Note: Domain names, distribution IDs
+# List all CloudFront distributions
+aws cloudfront list-distributions --output json
 
-**VPC Resources:**
-- Go to VPC console
-- List all VPCs in ap-southeast-1
-- Note: VPC IDs, CIDR ranges
+# List all VPC resources
+aws ec2 describe-vpcs --region ap-southeast-1 --output json
+```
 
 Create inventory spreadsheet:
 - Resource name & type
@@ -63,99 +53,119 @@ Create inventory spreadsheet:
 
 #### Lambda Functions
 
-To check Lambda invocations:
-
-1. Go to CloudWatch console
-2. Click "Metrics" → "Lambda"
-3. Select each function
-4. Choose metric: "Invocations"
-5. Set time range: Last 7 days
-6. Check if Sum = 0 (unused function)
+```bash
+# Check Lambda invocations last 7 days
+aws cloudwatch get-metric-statistics \
+  --namespace AWS/Lambda \
+  --metric-name Invocations \
+  --dimensions Name=FunctionName,Value=AdminManageCoachesFunction \
+  --start-time $(date -d '7 days ago' -u +%Y-%m-%dT%H:%M:%S) \
+  --end-time $(date -u +%Y-%m-%dT%H:%M:%S) \
+  --period 86400 \
+  --statistics Sum \
+  --region ap-southeast-1
+```
 
 If no invocations in last 7 days = unused function (consider deletion)
 
 #### API Gateways
 
-To check API request count:
-
-1. Go to CloudWatch console
-2. Click "Metrics" → "API Gateway"
-3. Select your API
-4. Choose metric: "Count"
-5. Set time range: Last 30 days
-6. Check if Sum = 0 (unused API)
+```bash
+# Check API request count
+aws cloudwatch get-metric-statistics \
+  --namespace AWS/ApiGateway \
+  --metric-name Count \
+  --dimensions Name=ApiName,Value=LeafLungs-UserInfo-API \
+  --start-time $(date -d '30 days ago' -u +%Y-%m-%dT%H:%M:%S) \
+  --end-time $(date -u +%Y-%m-%dT%H:%M:%S) \
+  --period 2592000 \
+  --statistics Sum \
+  --region ap-southeast-1
+```
 
 #### S3 Buckets
 
-To check bucket sizes:
+Check bucket sizes:
 
-1. Go to S3 console
-2. Click on each bucket
-3. Go to "Storage" tab
-4. See "Storage used" value
-5. Review storage class (Standard, Infrequent Access, Glacier)
-6. Consider moving old objects to cheaper storage classes
+```bash
+# Get bucket size
+aws s3api list-objects-v2 \
+  --bucket leaflungs-frontend-new \
+  --query 'Contents[*].Size' \
+  --output json | jq 'add/1024/1024/1024'  # Size in GB
+```
 
-S3 storage class pricing:
+Check S3 storage class:
 - Standard: $0.023/GB/month
 - Infrequent Access: $0.0125/GB/month
 - Glacier: $0.004/GB/month
 
+Move old objects to cheaper storage classes
+
 #### CloudFront
 
-To check cache hit ratio:
+Check cache hit ratio:
 
-1. Go to CloudWatch console
-2. Click "Metrics" → "CloudFront"
-3. Select your distribution
-4. Choose metric: "CacheHitRate"
-5. Set time range: Last 30 days
-6. If cache hit ratio < 50%, may need optimization
+```bash
+# If cache hit ratio < 50%, may need optimization
+aws cloudwatch get-metric-statistics \
+  --namespace AWS/CloudFront \
+  --metric-name CacheHitRate \
+  --dimensions Name=DistributionId,Value=E1NREZDKTJH6Y9 \
+  --start-time $(date -d '30 days ago' -u +%Y-%m-%dT%H:%M:%S) \
+  --end-time $(date -u +%Y-%m-%dT%H:%M:%S) \
+  --period 2592000 \
+  --statistics Average \
+  --region us-east-1
+```
 
-#### EC2 Database Instances
+#### RDS
 
-To check CPU & memory usage:
+Check CPU & connection usage:
 
-1. Go to CloudWatch console
-2. Click "Metrics" → "EC2"
-3. Select your database instance (DB-PG or DB-Mongo)
-4. Choose metric: "CPUUtilization"
-5. Set time range: Last 30 days
-6. Check Average and Maximum values
+```bash
+aws cloudwatch get-metric-statistics \
+  --namespace AWS/RDS \
+  --metric-name CPUUtilization \
+  --dimensions Name=DBInstanceIdentifier,Value=smoking-cessation-db \
+  --start-time $(date -d '30 days ago' -u +%Y-%m-%dT%H:%M:%S) \
+  --end-time $(date -u +%Y-%m-%dT%H:%M:%S) \
+  --period 2592000 \
+  --statistics Average,Maximum \
+  --region ap-southeast-1
+```
 
-If CPU < 10% consistently: May downsize instance type (saves money on EC2)
+If CPU < 10% consistently: May downsize instance type (saves money)
 
 ---
 
 ## Phần 3: Cost Optimization Strategies
 
-### 1. Right-Sizing EC2 Database Instances
+### 1. Right-Sizing Instances
 
-Current: t4g.small EC2 instances (PostgreSQL + MongoDB)
-Cost: ~$30-40/month per instance
+Current: db.t3.small RDS
+Cost: ~$40/month
 
 Options:
-- t4g.nano: ~$3-5/month (for test/dev)
-- t4g.micro: ~$8-10/month (for light production)
-- t4g.small: Keep as-is (recommended for production)
+- db.t3.micro: ~$20/month (if usage low)
+- db.t4g.micro: ~$15/month (Graviton processor, cheaper)
 
-Check: EC2 CPU < 10% on average → downsize to save money
+Check: RDS CPU < 10% on average → downsize
 
 ### 2. Reserve Capacity (if stable usage)
 
-For production, consider AWS EC2 Reserved Instances:
+For production, consider Reserved Instances:
 - 1-year: ~30% discount
 - 3-year: ~50% discount
 
-To purchase reserved EC2 instances:
-
-1. Go to EC2 console
-2. Click "Reserved Instances" (left menu)
-3. Click "Purchase Reserved Instances"
-4. Configure:
-   - Instance type: t4g.small
-   - Term length: 1-year or 3-year
-5. Click "Purchase"
+Example:
+```bash
+# Purchase 1-year reserved RDS instance
+aws rds purchase-reserved-db-instances-offering \
+  --reserved-db-instances-offering-id <OFFERING_ID> \
+  --db-instance-count 1 \
+  --region ap-southeast-1
+```
 
 ### 3. Optimize Data Transfer
 
@@ -193,45 +203,51 @@ If cache hit ratio < 50%:
 
 ## Phần 4: Backup & Archive
 
-### Bước 1: Backup EC2 Databases
+### Bước 1: Backup RDS
 
-To backup PostgreSQL and MongoDB on EC2:
+```bash
+# Create manual snapshot before deletion/modification
+aws rds create-db-snapshot \
+  --db-instance-identifier smoking-cessation-db \
+  --db-snapshot-identifier smoking-cessation-db-final-backup-$(date +%s) \
+  --region ap-southeast-1
+```
 
-**PostgreSQL (DB-PG: 172.0.8.55):**
+### Bước 2: Export RDS Data to S3
 
-1. SSH into the EC2 instance
-2. Create backup: `pg_dump smokingcessation > backup_$(date +%Y%m%d).sql`
-3. Compress: `gzip backup_*.sql`
-
-**MongoDB (DB-Mongo: 172.0.8.124):**
-
-1. SSH into the EC2 instance
-2. Create backup: `mongodump --db smokingcessation --out backup_$(date +%Y%m%d)`
-3. Compress: `tar czf backup_*.tar backup_*`
-
-### Bước 2: Upload Database Backups to S3
-
-To export database backups for archival:
-
-1. SSH into database EC2 instance
-2. Upload to S3:
-   - Via AWS CLI (if configured): `aws s3 sync /backups s3://smoking-cessation-backups/`
-   - Or manually download and upload via S3 console
+```bash
+aws rds start-export-task \
+  --export-task-identifier smoking-cessation-export-$(date +%s) \
+  --source-arn arn:aws:rds:ap-southeast-1:140570829989:db:smoking-cessation-db \
+  --s3-bucket-name smoking-cessation-backups \
+  --s3-prefix rds-export/ \
+  --iam-role-arn arn:aws:iam::140570829989:role/rds-export-role \
+  --region ap-southeast-1
+```
 
 ### Bước 3: Archive S3 Data
 
-For old data (> 90 days), setup lifecycle policies:
+For old data (> 90 days):
 
-1. Go to S3 console
-2. Click on bucket name (e.g., "leaflungs-images")
-3. Go to "Management" tab
-4. Click "Create lifecycle rule"
-5. Configure:
-   - Name: "archive-old-data"
-   - Filter: Prefix "chat/"
-   - Transitions: Move to Glacier after 90 days
-   - Expiration: Delete after 365 days
-6. Click "Create rule"
+```bash
+# Transition S3 objects to Glacier
+aws s3api put-bucket-lifecycle-configuration \
+  --bucket leaflungs-images \
+  --lifecycle-configuration '{
+    "Rules": [{
+      "ID": "archive-old-data",
+      "Filter": {"Prefix": "chat/"},
+      "Transitions": [{
+        "Days": 90,
+        "StorageClass": "GLACIER"
+      }],
+      "Expiration": {
+        "Days": 365
+      }
+    }]
+  }' \
+  --region ap-southeast-1
+```
 
 ---
 
@@ -241,43 +257,45 @@ For old data (> 90 days), setup lifecycle policies:
 
 If any test functions exist:
 
-1. Go to Lambda console
-2. Click on test function name
-3. Click "Actions" → "Delete"
-4. Type function name to confirm
-5. Click "Delete"
+```bash
+aws lambda delete-function \
+  --function-name test-function-name \
+  --region ap-southeast-1
+```
 
 ### Bước 2: Delete Unused API Gateway
 
 If multiple APIs for testing:
 
-1. Go to API Gateway console
-2. Click on API name
-3. Click "Actions" → "Delete API"
-4. Confirm deletion
+```bash
+aws apigateway delete-rest-api \
+  --rest-api-id api-id-to-delete \
+  --region ap-southeast-1
+```
 
 ### Bước 3: Delete Empty S3 Buckets
 
-To delete a bucket:
+```bash
+# Empty bucket first
+aws s3 rm s3://test-bucket-name --recursive
 
-1. Go to S3 console
-2. Click on bucket name
-3. Click "Empty" to remove all objects
-4. Confirm emptying
-5. Once empty, click "Delete" button
-6. Type bucket name to confirm
-7. Click "Delete bucket"
+# Delete bucket
+aws s3api delete-bucket \
+  --bucket test-bucket-name \
+  --region ap-southeast-1
+```
 
 ### Bước 4: Delete Unused CloudFront Distributions
 
-To delete a CloudFront distribution:
+Before deletion, disable distribution:
 
-1. Go to CloudFront console
-2. Click on distribution
-3. Click "Disable" (if enabled)
-4. Wait 15 minutes for propagation
-5. Once status shows "Disabled", click "Delete"
-6. Confirm deletion
+```bash
+aws cloudfront update-distribution \
+  --id E1NREZDKTJH6Y9 \
+  --distribution-config file://dist-config.json
+```
+
+Wait 15 minutes, then delete
 
 ---
 
@@ -287,83 +305,82 @@ WARNING: This is destructive and cannot be undone!
 
 ### Backup Checklist Before Deletion
 
-- [ ] PostgreSQL data backed up (pg_dump)
-- [ ] MongoDB data backed up (mongodump)
-- [ ] Database backups uploaded to S3
-- [ ] S3 data backed up externally (if needed)
+- [ ] RDS snapshot created
+- [ ] Data exported to S3
+- [ ] S3 data backed up externally
 - [ ] CloudTrail logs reviewed & archived
 - [ ] Code backed up to GitHub
 - [ ] DNS records updated (if redirecting)
 - [ ] Team notified
 
-### Bước 1: Delete EC2 Database Instances
+### Bước 1: Delete RDS Instance
 
-To delete database EC2 instances:
+```bash
+aws rds delete-db-instance \
+  --db-instance-identifier smoking-cessation-db \
+  --skip-final-snapshot \
+  --region ap-southeast-1
+```
 
-1. Go to EC2 console
-2. Click "Instances"
-3. Select database instance (DB-PG or DB-Mongo)
-4. Click "Instance State" → "Terminate"
-5. Confirm termination
-6. Wait for instance to terminate
-7. Verify EBS volumes are deleted (optional: create snapshots first if needed)
-8. Repeat for second database instance
+Or with final snapshot:
+
+```bash
+aws rds delete-db-instance \
+  --db-instance-identifier smoking-cessation-db \
+  --final-db-snapshot-identifier smoking-cessation-final-snapshot \
+  --region ap-southeast-1
+```
 
 ### Bước 2: Delete Lambda Functions
 
-To delete each Lambda function:
+```bash
+aws lambda delete-function \
+  --function-name AdminManageCoachesFunction \
+  --region ap-southeast-1
 
-1. Go to Lambda console
-2. Click on function name
-3. Click "Actions" → "Delete"
-4. Type function name to confirm
-5. Click "Delete"
-6. Repeat for each function
+# Repeat for other functions
+```
 
 ### Bước 3: Delete API Gateways
 
-To delete each API Gateway:
+```bash
+aws apigateway delete-rest-api \
+  --rest-api-id v7agf76rrh \
+  --region ap-southeast-1
 
-1. Go to API Gateway console
-2. Click on API name (e.g., "LeafLungs-UserInfo-API")
-3. Click "Actions" → "Delete API"
-4. Confirm deletion
-5. Repeat for second API (leaflungs-chat-api)
+aws apigateway delete-rest-api \
+  --rest-api-id vuds39de1b \
+  --region ap-southeast-1
+```
 
 ### Bước 4: Delete Cognito User Pool
 
-To delete Cognito User Pool:
-
-1. Go to Cognito console
-2. Click "User pools"
-3. Click on your user pool
-4. Click "Delete user pool" (bottom right)
-5. Type the user pool name to confirm
-6. Click "Delete"
+```bash
+aws cognito-idp delete-user-pool \
+  --user-pool-id us-east-1_dskUsnKt3 \
+  --region us-east-1
+```
 
 ### Bước 5: Delete S3 Buckets (and contents)
 
-To delete each S3 bucket:
+```bash
+# Empty bucket
+aws s3 rm s3://leaflungs-frontend-new --recursive
+aws s3 rm s3://leaflungs-images --recursive
+aws s3 rm s3://leaflungs-images-sg --recursive
 
-1. Go to S3 console
-2. For each bucket (leaflungs-frontend-new, leaflungs-images, leaflungs-images-sg):
-   - Click on bucket name
-   - Click "Empty" to remove all objects
-   - Confirm emptying
-   - Once empty, click "Delete" button
-   - Type bucket name to confirm
-   - Click "Delete bucket"
+# Delete buckets
+aws s3api delete-bucket --bucket leaflungs-frontend-new
+aws s3api delete-bucket --bucket leaflungs-images --region ap-southeast-1
+aws s3api delete-bucket --bucket leaflungs-images-sg --region ap-southeast-1
+```
 
 ### Bước 6: Delete CloudFront Distribution
 
-To delete CloudFront distribution:
-
-1. Go to CloudFront console
-2. Click on distribution (if not already disabled)
-3. If enabled, click "Disable" first
-4. Wait 15 minutes for propagation
-5. Once status shows "Disabled", click "Delete"
-6. Confirm deletion
+```bash
+aws cloudfront delete-distribution \
+  --id E1NREZDKTJH6Y9
+```
 
 ---
 
@@ -377,19 +394,18 @@ Typical costs for this architecture:
 |---------|-------|------|
 | Lambda | 100K invocations/month | ~$2 |
 | API Gateway | 10M requests/month | ~$50 |
-| EC2 (2x DB instances) | 2 x t4g.small for PostgreSQL + MongoDB | ~$60-70 |
-| EC2 (2x App instances) | 2 x t4g.small for applications | ~$60-70 |
+| RDS | db.t3.small, 30 day backup | ~$40 |
 | S3 | 100 GB storage | ~$2 |
 | CloudFront | 1 TB/month transfer | ~$85 |
 | Cognito | 1K users | ~$0 (free tier) |
 | NAT Gateway | 10 GB transfer | ~$5 |
-| **Total** | | ~**$300-350/month** |
+| **Total** | | ~**$184/month** |
 
 Cost optimization opportunities:
-1. Use t4g.nano/micro for light databases: Saves ~$20-30/month
+1. Use db.t4g.micro: Saves ~$25/month
 2. Cache more aggressively: Saves ~$30/month
-3. Reserved EC2 instances: Saves ~$60-80/month
-4. Total savings: ~$110-140/month (35-40% reduction)
+3. Reserved RDS: Saves ~$12/month
+4. Total savings: ~$67/month (36% reduction)
 
 ### AWS Cost Explorer
 
@@ -412,10 +428,10 @@ Cost optimization opportunities:
 # Workshop Completion Report
 
 ## Architecture Summary
-- Services deployed: Lambda, API Gateway, EC2 (PostgreSQL + MongoDB), S3, CloudFront, Cognito, NLB
+- Services deployed: Lambda, API Gateway, RDS, S3, CloudFront, Cognito, NLB
 - Regions: us-east-1 (Cognito), ap-southeast-1 (main)
 - Total users: 1000+
-- Monthly costs: $300-350
+- Monthly costs: $184
 
 ## Key Learnings
 
@@ -431,7 +447,7 @@ Cost optimization opportunities:
 
 3. Cost optimization
    - CloudFront caching important
-   - EC2 instances can be right-sized or use Reserved Instances
+   - RDS can be right-sized
    - Reserved instances save 30-50%
 
 4. Monitoring critical
@@ -440,7 +456,7 @@ Cost optimization opportunities:
 
 ## Recommendations for Next Phase
 
-1. Setup automated backups for EC2 databases (pg_dump/mongodump cronjobs)
+1. Enable auto-scaling for RDS read replicas
 2. Implement CI/CD for automated deployments
 3. Add comprehensive test suite
 4. Setup on-call rotation & runbooks
@@ -485,7 +501,7 @@ Congratulations! You've successfully:
 1. ✓ Verified/setup Cognito authentication
 2. ✓ Verified/setup Lambda functions
 3. ✓ Verified/setup API Gateways
-4. ✓ Verified EC2 databases (PostgreSQL + MongoDB)
+4. ✓ Created RDS database
 5. ✓ Verified S3 & CloudFront
 6. ✓ Verified VPC & Security
 7. ✓ Implemented monitoring & logging
@@ -495,7 +511,7 @@ This infrastructure can support:
 - 1000+ concurrent users
 - 100K+ requests/day
 - Highly available (multi-AZ capable)
-- Scalable (auto-scale Lambda, upgrade EC2 instance types)
+- Scalable (auto-scale Lambda & RDS replicas)
 - Secure (VPC isolation, encryption, IAM)
 - Observable (comprehensive logging & monitoring)
 

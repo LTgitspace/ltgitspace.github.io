@@ -1,363 +1,290 @@
-# Module 4: Create Lambda Functions
+# Module 4: Verify & Update Lambda Functions
 
 ## Mục tiêu Module
 
-- Tạo 5 Lambda functions từ đầu
-- Cấu hình IAM roles & permissions
-- Thiết lập environment variables
-- Cấu hình Cognito post-confirmation trigger
-- Test Lambda functions
-- Setup monitoring & alarms
+- Verify Lambda functions hiện tại
+- Kiểm tra IAM roles & permissions
+- Review environment variables & configuration
+- Kiểm tra logs & troubleshoot errors
+- Verify integration với EC2 servers
+- Update functions nếu cần thiết
 
-**Duration**: 4-5 giờ
+## Important: Lambda & EC2 Integration
 
----
-
-## Lambda Functions Overview
-
-Lambda functions sẽ xử lý các specific events:
-
-| Function | Region | Runtime | Purpose | Memory | Timeout |
-|----------|--------|---------|---------|--------|---------|
-| CognitoPostConfirmationTrigger | us-east-1 | nodejs20.x | Create user profile khi user signup | 256 MB | 30s |
-| AdminManageCoachesFunction | ap-southeast-1 | nodejs20.x | Manage coaches (CRUD operations) | 512 MB | 30s |
-| image-upload-lambda | ap-southeast-1 | nodejs20.x | Handle image uploads to S3 | 256 MB | 60s |
-| leaflungs-websocket-authorizer | ap-southeast-1 | nodejs20.x | Authorize WebSocket connections | 256 MB | 30s |
-| PaymentFunction | ap-southeast-1 | nodejs24.x | Process payments | 512 MB | 60s |
+Lambda functions hoạt động **complementary** với EC2 servers:
+- EC2 servers (user-cessation, social-media): Xử lý requests liên tục
+- Lambda functions: Xử lý specific events (file upload, payments, webhooks)
+- Integration qua API Gateway: API Gateway routes requests tới EC2 hoặc Lambda
 
 ---
 
-## Phần 1: Create IAM Role for Lambda Functions
+## Phần 1: Inventory Lambda Functions Hiện Tại
 
-### Bước 1: Truy cập IAM Console
+### Status Hiện Tại
 
-1. Login vào AWS Console bằng IAM user
-2. Tìm kiếm "IAM"
-3. Click "IAM" từ services list
-4. Left menu: Click "Roles"
-5. Click "Create role"
+**us-east-1 (1 function)**
 
-![IAM Roles Page](../assets/04-iam-roles-page.png)
+| Function | Runtime | Role | Memory | Timeout | Last Modified |
+|----------|---------|------|--------|---------|---|
+| CognitoPostConfirmationTrigger | nodejs20.x | CognitoPostConfirmationLambdaRole | 256 MB | 30s | 2025-11-24 |
 
-### Bước 2: Configure Trust Relationship
+**ap-southeast-1 (4 functions)**
 
-1. **Trusted entity type**: Select "AWS service"
-2. **Service or use case**: Search và click "Lambda"
-3. Click "Next"
+| Function | Runtime | Role | Memory | Timeout | Last Modified |
+|----------|---------|------|--------|---------|---|
+| AdminManageCoachesFunction | nodejs20.x | AdminOperationsLambdaRole | 512 MB | 30s | 2025-12-01 |
+| PaymentFunction | nodejs24.x | ? | ? | ? | 2025-11-30 |
+| leaflungs-websocket-authorizer | nodejs20.x | ? | ? | ? | 2025-12-02 |
+| image-upload-lambda | nodejs20.x | ImageUploadLambdaRole | 256 MB | 10s | 2025-11-30 |
 
-![Lambda Trust Policy](../assets/04-lambda-trust-policy.png)
+**Total: 5 Lambda functions**
 
-### Bước 3: Add Permissions
+### API Gateway Resources Integrated
 
-1. Search và check policies:
-   - ✅ `AWSLambdaVPCAccessExecutionRole` (for EC2 database access)
-   - ✅ `AWSLambdaBasicExecutionRole` (for CloudWatch logs)
-   - ✅ `AmazonS3FullAccess` (for image upload function)
-   - ✅ `SecretsManagerReadSecret` (for database credentials)
-2. Click "Next"
-
-![Lambda Permissions](../assets/04-lambda-permissions.png)
-
-### Bước 4: Review & Create
-
-1. **Role name**: `smoking-cessation-lambda-role`
-2. **Description**: `Lambda execution role for smoking cessation platform`
-3. Click "Create role"
-
-⏳ **Chờ role được tạo**
-
-### Bước 5: Note Role ARN
-
-1. Click vào role vừa tạo: `smoking-cessation-lambda-role`
-2. Copy **Role ARN**: Format là `arn:aws:iam::014097726842:role/smoking-cessation-lambda-role`
-3. Lưu lại để dùng trong modules tiếp theo
-
-![Role ARN](../assets/04-role-arn.png)
+```
+/admin
+/admin/coaches
+/api/user-info
+/api/user-info/{id}
+/api/user-info/by-user-id
+/api/user-info/empty
+/upload
+```
 
 ---
 
-## Phần 2: Create Cognito Post-Confirmation Trigger (us-east-1)
+## Phần 2: Verify Cognito Post-Confirmation Trigger
 
-### Bước 1: Truy cập Lambda Console
+### Bước 1: Truy cập Lambda Function
 
 1. Login vào AWS Console
 2. Tìm kiếm "Lambda"
-3. Click "Lambda" service
-4. **Chọn region: us-east-1** (phải giống với Cognito)
-5. Click "Create function"
+3. Click Lambda service
+4. Chọn region: **us-east-1**
+5. Click vào function "CognitoPostConfirmationTrigger"
 
-![Lambda Console](../assets/04-lambda-console.png)
+![Lambda Function Page](../assets/04-lambda-function-page.png)
 
-### Bước 2: Configure Function Basics
+### Bước 2: Review Configuration
 
-1. **Function name**: `smoking-cessation-cognito-post-confirmation`
-2. **Runtime**: nodejs20.x
-3. **Execution role**: Select "Use an existing role"
-4. **Existing role**: `smoking-cessation-lambda-role` (từ Phần 1)
-5. Click "Create function"
+Từ "General configuration" section:
 
-⏳ **Chờ function được tạo (khoảng 1-2 phút)**
+- Runtime: nodejs20.x (OK)
+- Memory: 256 MB (Adequate)
+- Timeout: 30 seconds (OK)
+- Role: CognitoPostConfirmationLambdaRole (OK)
 
-![Create Lambda Function](../assets/04-lambda-create-function.png)
+![Function Configuration](../assets/04-lambda-general-configuration.png)
 
-### Bước 3: Configure General Settings
+### Bước 3: Verify Cognito Integration
 
-1. Scroll xuống "General configuration"
-2. Click "Edit"
-3. **Memory**: 256 MB (default)
-4. **Timeout**: 30 seconds
-5. Click "Save"
+1. Click "Configuration" tab
+2. Click "Triggers" (left menu)
+3. Verify trigger:
+   - Source: Cognito User Pool
+   - User Pool: leaflungs-user-pool
+   - Trigger: Post confirmation
 
-![Lambda General Config](../assets/04-lambda-general-config.png)
+![Cognito Trigger](../assets/04-lambda-cognito-trigger.png)
 
-### Bước 4: Add Environment Variables
-
-1. Scroll xuống "Environment variables"
-2. Click "Edit"
-3. Add the following variables:
-   ```
-   PG_HOST = 172.0.8.55
-   PG_USER = postgres
-   PG_PASSWORD = (will set via Secrets Manager later)
-   PG_DATABASE = smoking_cessation
-   PG_PORT = 5432
-   COGNITO_USER_POOL_ID = (get from Module 3)
-   ```
-4. Click "Save"
-
-![Environment Variables](../assets/04-lambda-env-vars.png)
-
-### Bước 5: Add Placeholder Code
+### Bước 4: Review Function Code
 
 1. Click "Code" tab
-2. In the code editor, replace everything with:
+2. Review code content:
+   - Check if it creates user profile
+   - Check if it initializes coaching sessions
+   - Verify error handling
+
+Example expected code structure:
 
 ```javascript
 exports.handler = async (event) => {
-  console.log('Cognito post-confirmation event:', JSON.stringify(event, null, 2));
+  console.log('Cognito post-confirmation event:', event);
 
   try {
     const userId = event.request.userAttributes.sub;
     const email = event.request.userAttributes.email;
-    const name = event.request.userAttributes.name;
 
-    console.log(`Creating user profile for ${email}`);
-
-    // TODO: Implement database connection to PostgreSQL
-    // Create user record in users table
-    // Initialize coaching session if needed
+    // TODO: Create user profile in RDS
+    // INSERT INTO users (cognito_id, email, ...) VALUES (...)
 
     return event;
   } catch (error) {
-    console.error('Error in post-confirmation:', error);
+    console.error('Error:', error);
     throw error;
   }
 };
 ```
 
-3. Click "Deploy"
+### Bước 5: Check CloudWatch Logs
 
-![Deploy Code](../assets/04-lambda-deploy.png)
+1. Click "Monitor" tab
+2. Click "View logs in CloudWatch"
+3. Select log stream (most recent)
+4. Review logs cho:
+   - Success: "Cognito post-confirmation event"
+   - Errors: Check error messages
+   - Database operations: Verify user creation
 
-### Bước 6: Add Cognito Trigger (Later)
-
-**Note**: Sau khi deploy code, bạn sẽ cấu hình Cognito trigger ở Phần 8
+![CloudWatch Logs](../assets/09-cloudwatch-logs.png)
 
 ---
 
-## Phần 3: Create Admin Manage Coaches Function (ap-southeast-1)
+## Phần 3: Verify Admin Coaches Function
 
-### Bước 1: Switch to ap-southeast-1 Region
+### Bước 1: Truy cập Function
 
-1. Top left: Click region dropdown
-2. Select **ap-southeast-1**
-3. Click "Create function"
+1. Chọn region: **ap-southeast-1**
+2. Click vào function "AdminManageCoachesFunction"
 
-### Bước 2: Configure Function
+### Bước 2: Review Configuration
 
-1. **Function name**: `smoking-cessation-admin-manage-coaches`
-2. **Runtime**: nodejs20.x
-3. **Execution role**: `smoking-cessation-lambda-role`
-4. Click "Create function"
+- Runtime: nodejs20.x (OK)
+- Memory: 512 MB (Good for database operations)
+- Timeout: 30 seconds (May need increase)
+- Role: AdminOperationsLambdaRole (OK)
 
-⏳ **Chờ function được tạo**
+### Bước 3: Verify API Gateway Integration
 
-### Bước 3: Configure Settings
+1. Click "Configuration" tab
+2. Click "Triggers" (left menu)
+3. Verify:
+   - API Gateway: LeafLungs-UserInfo-API
+   - Resources: /admin/coaches
+   - Methods: GET, POST, PUT, DELETE
 
-1. Click "Edit" ở "General configuration"
-2. **Memory**: 512 MB (for database operations)
-3. **Timeout**: 30 seconds
-4. Click "Save"
+![API Gateway Trigger](../assets/04-lambda-api-gateway-trigger.png)
 
-### Bước 4: Add Environment Variables
+### Bước 4: Review Code
 
-1. Click "Edit" ở "Environment variables"
-2. Add:
-   ```
-   PG_HOST = 172.0.8.55
-   PG_USER = postgres
-   PG_PASSWORD = (will set via Secrets Manager)
-   PG_DATABASE = smoking_cessation
-   API_REGION = ap-southeast-1
-   ```
-3. Click "Save"
+Expected functionality:
+- List coaches
+- Create new coach
+- Update coach info
+- Delete coach
+- RBAC check (admin only)
 
-### Bước 5: Add Placeholder Code
+### Bước 5: Test Function
 
-```javascript
-exports.handler = async (event) => {
-  console.log('Admin coaches request:', JSON.stringify(event, null, 2));
+Via AWS Console:
 
-  try {
-    const httpMethod = event.httpMethod;
-    const path = event.path;
-    const body = event.body ? JSON.parse(event.body) : {};
+1. Click "Test" tab
+2. Create test event:
 
-    console.log(`${httpMethod} ${path}`);
-
-    // TODO: Implement database operations
-    // GET /admin/coaches - List all coaches
-    // POST /admin/coaches - Create new coach
-    // PUT /admin/coaches/{id} - Update coach
-    // DELETE /admin/coaches/{id} - Delete coach
-    // Include RBAC check (admin only)
-
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ message: 'Coaches function placeholder' })
-    };
-  } catch (error) {
-    console.error('Error:', error);
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: error.message })
-    };
+```json
+{
+  "httpMethod": "GET",
+  "path": "/admin/coaches",
+  "headers": {
+    "Authorization": "Bearer <YOUR_ACCESS_TOKEN>"
   }
-};
+}
 ```
 
-Click "Deploy"
+3. Click "Test"
+4. Verify response:
+   - Status: 200
+   - Body: List of coaches
+
+![Test Result](../assets/04-lambda-test-execution.png)
 
 ---
 
-## Phần 4: Create Image Upload Lambda (ap-southeast-1)
+## Phần 4: Verify Image Upload Lambda
 
-### Bước 1: Create Function
+### Bước 1: Truy cập Function
 
-1. Click "Create function"
-2. **Function name**: `smoking-cessation-image-upload`
-3. **Runtime**: nodejs20.x
-4. **Execution role**: `smoking-cessation-lambda-role`
-5. Click "Create function"
+1. Stay in ap-southeast-1 region
+2. Click vào "image-upload-lambda"
 
-### Bước 2: Configure Settings
+### Bước 2: Review Configuration
 
-1. Click "Edit" ở "General configuration"
-2. **Memory**: 256 MB
-3. **Timeout**: 60 seconds (vì file upload có thể mất thời gian)
+- Runtime: nodejs20.x (OK)
+- Memory: 256 MB (Adequate for image upload)
+- Timeout: 10 seconds (May need increase to 30s)
+- Role: ImageUploadLambdaRole (OK)
+
+**Issue**: Timeout có thể quá ngắn cho file upload
+
+### Bước 3: Update Timeout (if needed)
+
+1. Click "Configuration" tab
+2. Click "General configuration" → Edit
+3. Change Timeout: 30 seconds (or 60s cho large files)
 4. Click "Save"
 
-### Bước 3: Add Environment Variables
+![Edit Configuration](../assets/04-lambda-edit-timeout.png)
 
-1. Click "Edit" ở "Environment variables"
-2. Add:
-   ```
-   S3_BUCKET = smoking-cessation-images
-   S3_REGION = ap-southeast-1
-   MAX_FILE_SIZE = 10485760
-   ```
-3. Click "Save"
+### Bước 4: Verify S3 Integration
 
-### Bước 4: Add Placeholder Code
+1. Click "Configuration" tab
+2. Click "Environment variables"
+3. Verify variables:
+   - S3_BUCKET: leaflungs-images hoặc leaflungs-images-sg
+   - S3_REGION: ap-southeast-1
 
-```javascript
-exports.handler = async (event) => {
-  console.log('Image upload request:', JSON.stringify(event, null, 2));
+![Environment Variables](../assets/04-lambda-environment-variables.png)
 
-  try {
-    const userId = event.requestContext.authorizer.claims.sub;
-    const fileBuffer = Buffer.from(event.body, 'base64');
-    const fileName = event.headers['x-filename'] || `image-${Date.now()}.jpg`;
+### Bước 5: Test Image Upload
 
-    console.log(`Uploading ${fileName} for user ${userId}`);
+1. Click "Test" tab
+2. Create test event:
 
-    // TODO: Implement S3 upload
-    // Validate file size (max 10MB)
-    // Upload to S3 with user prefix
-    // Generate pre-signed URL
-    // Store reference in database
-
-    const s3Url = `https://${process.env.S3_BUCKET}.s3.${process.env.S3_REGION}.amazonaws.com/${userId}/${fileName}`;
-
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ url: s3Url })
-    };
-  } catch (error) {
-    console.error('Error:', error);
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: error.message })
-    };
-  }
-};
+```json
+{
+  "httpMethod": "POST",
+  "path": "/upload",
+  "headers": {
+    "Content-Type": "multipart/form-data",
+    "Authorization": "Bearer <YOUR_ACCESS_TOKEN>"
+  },
+  "body": "base64-encoded-image-data"
+}
 ```
 
-Click "Deploy"
+3. Click "Test"
+4. Verify response:
+   - Status: 200
+   - Body: Contains S3 URL
 
 ---
 
-## Phần 5: Create WebSocket Authorizer Lambda (ap-southeast-1)
+## Phần 5: Verify WebSocket Authorizer Lambda
 
-### Bước 1: Create Function
+### Bước 1: Truy cập Function
 
-1. Click "Create function"
-2. **Function name**: `smoking-cessation-websocket-authorizer`
-3. **Runtime**: nodejs20.x
-4. **Execution role**: `smoking-cessation-lambda-role`
-5. Click "Create function"
+1. Stay in ap-southeast-1
+2. Click vào "leaflungs-websocket-authorizer"
 
-### Bước 2: Configure Settings
+### Bước 2: Review Configuration
 
-1. Click "Edit" ở "General configuration"
-2. **Memory**: 256 MB
-3. **Timeout**: 30 seconds
-4. Click "Save"
+- Runtime: nodejs20.x (OK)
+- Purpose: Authorize WebSocket connections
+- Should validate JWT tokens
 
-### Bước 3: Add Environment Variables
+### Bước 3: Check CloudWatch Logs
 
-1. Click "Edit" ở "Environment variables"
-2. Add:
-   ```
-   COGNITO_USER_POOL_ID = (from Module 3)
-   COGNITO_CLIENT_ID = (from Module 3)
-   JWT_SECRET = (will be set via Secrets Manager)
-   ```
-3. Click "Save"
+1. Click "Monitor" tab
+2. View recent logs
+3. Check for:
+   - Token validation errors
+   - Connection rejections
+   - Authorization failures
 
-### Bước 4: Add Placeholder Code
+### Bước 4: Verify Code
 
+Expected functionality:
 ```javascript
 exports.handler = async (event) => {
-  console.log('WebSocket authorization event:', JSON.stringify(event, null, 2));
+  const token = event.authorizationToken;
 
   try {
-    const token = event.authorizationToken;
+    // Validate JWT token
+    const decoded = verifyToken(token);
 
-    if (!token) {
-      throw new Error('No authorization token');
-    }
-
-    console.log('Validating WebSocket token');
-
-    // TODO: Implement JWT token validation
-    // Validate token signature
-    // Check token expiration
-    // Extract user ID from token
-
-    // Placeholder authorization response
+    // Return auth policy
     return {
-      principalId: 'user-id-placeholder',
+      principalId: decoded.sub,
       policyDocument: {
         Version: '2012-10-17',
         Statement: [
@@ -370,502 +297,263 @@ exports.handler = async (event) => {
       }
     };
   } catch (error) {
-    console.error('Authorization failed:', error);
     throw new Error('Unauthorized');
   }
 };
 ```
 
-Click "Deploy"
-
 ---
 
-## Phần 6: Create Payment Function (ap-southeast-1)
+## Phần 6: Verify Payment Function
 
-### Bước 1: Create Function
+### Bước 1: Check Function Details
 
-1. Click "Create function"
-2. **Function name**: `smoking-cessation-payment`
-3. **Runtime**: nodejs24.x (latest version)
-4. **Execution role**: `smoking-cessation-lambda-role`
-5. Click "Create function"
+1. Click vào "PaymentFunction"
+2. Note: Runtime is nodejs24.x (newer version)
 
-### Bước 2: Configure Settings
+### Bước 2: Find IAM Role
 
-1. Click "Edit" ở "General configuration"
-2. **Memory**: 512 MB (payment processing needs resources)
-3. **Timeout**: 60 seconds
-4. Click "Save"
-
-### Bước 3: Add Environment Variables
-
-1. Click "Edit" ở "Environment variables"
-2. Add:
-   ```
-   PG_HOST = 172.0.8.55
-   PG_USER = postgres
-   PG_PASSWORD = (will set via Secrets Manager)
-   PG_DATABASE = smoking_cessation
-   STRIPE_API_KEY = (will be set via Secrets Manager)
-   STRIPE_WEBHOOK_SECRET = (will be set via Secrets Manager)
-   PAYMENT_TABLE = payments
-   ```
-3. Click "Save"
-
-### Bước 4: Add Placeholder Code
-
-```javascript
-  exports.handler = async (event) => {
-    console.log('Payment event:', JSON.stringify(event, null, 2));
-
-    try {
-      const { userId, amount, paymentMethod, description } = JSON.parse(event.body);
-
-      console.log(`Processing payment for user ${userId}: $${amount}`);
-
-      // TODO: Implement payment processing
-      // Validate amount
-      // Process payment via Stripe/Payment gateway
-      // Store payment record in database
-      // Send confirmation email
-      // Handle webhooks
-
-      return {
-        statusCode: 200,
-        body: JSON.stringify({
-          success: true,
-          transactionId: `txn-${Date.now()}`,
-          message: 'Payment processed successfully'
-        })
-      };
-    } catch (error) {
-      console.error('Payment error:', error);
-      return {
-        statusCode: 500,
-        body: JSON.stringify({ error: error.message })
-      };
-    }
-  };
+```bash
+aws lambda get-function-configuration --function-name PaymentFunction --region ap-southeast-1 --output table --query 'Role'
 ```
 
-Click "Deploy"
+This will show the IAM role ARN
 
----
+### Bước 3: Verify Role Permissions
 
-## Phần 7: Create Secrets Manager for Database Credentials
-
-### Bước 1: Truy cập Secrets Manager
-
-1. Tìm kiếm "Secrets Manager"
-2. Click service
-3. Click "Store a new secret"
-
-![Secrets Manager](../assets/04-secrets-manager.png)
-
-### Bước 2: Store Database Password
-
-1. **Secret type**: "Other type of secret"
-2. **Key/value pairs**:
-   - Key: `db-password`
-   - Value: `<your-postgres-password>`
-3. Click "Next"
-4. **Secret name**: `smoking-cessation/db-password`
-5. Click "Store secret"
-
-### Bước 3: Store Payment Credentials (Optional)
-
-1. Click "Store a new secret"
-2. **Secret type**: "Other type of secret"
-3. **Key/value pairs**:
-   - Key: `stripe-api-key`
-   - Value: `<your-stripe-key>`
-4. **Secret name**: `smoking-cessation/stripe-api-key`
-5. Click "Store secret"
-
-### Bước 4: Update Lambda IAM Role
-
-Lambda needs permission to read secrets:
-
-1. Go to IAM console
-2. Click "Roles"
-3. Click `smoking-cessation-lambda-role`
-4. Click "Add permissions" → "Create inline policy"
-5. Select "JSON" tab
-6. Paste:
-
-```json
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Action": [
-        "secretsmanager:GetSecretValue"
-      ],
-      "Resource": [
-        "arn:aws:secretsmanager:*:*:secret:smoking-cessation/*"
-      ]
-    }
-  ]
-}
+```bash
+aws iam get-role-policy --role-name <RoleName> --policy-name <PolicyName>
 ```
 
-7. Click "Review policy"
-8. **Policy name**: `lambda-secrets-access`
-9. Click "Create policy"
+Check if role has:
+- DynamoDB permissions (if using DynamoDB for payment records)
+- SNS permissions (if sending notifications)
+- S3 permissions (if storing receipts)
 
 ---
 
-## Phần 8: Configure Cognito Post-Confirmation Trigger
+## Phần 7: Verify IAM Roles & Permissions
 
-### Bước 1: Go to Cognito User Pool
+### Bước 1: Check All Lambda Roles
 
-1. Switch region to **us-east-1**
-2. Tìm kiếm "Cognito"
-3. Click Cognito service
-4. Click "User pools"
-5. Click vào user pool: `smoking-cessation-users` (tạo ở Module 3)
+Review each IAM role:
 
-![Cognito User Pool](../assets/04-cognito-user-pool.png)
-
-### Bước 2: Add Lambda Trigger
-
-1. Left menu: Click "User lifecycle"
-2. Click "Post confirmation"
-3. Click "Add Lambda trigger"
-4. **Lambda function**: `smoking-cessation-cognito-post-confirmation`
-5. Click "Save"
-
-![Post Confirmation Trigger](../assets/04-cognito-trigger.png)
-
-### Bước 3: Verify Trigger
-
-1. Refresh page
-2. Verify trigger shows:
-   - **Trigger**: Post confirmation
-   - **Function**: smoking-cessation-cognito-post-confirmation (us-east-1)
-   - **Status**: Active
-
----
-
-## Phần 9: Grant Cognito Permission to Invoke Lambda
-
-Cognito cần permission để gọi Lambda function:
-
-### Bước 1: Add Resource-Based Policy
-
-1. Switch to **us-east-1** region
-2. Go to Lambda console
-3. Click function: `smoking-cessation-cognito-post-confirmation`
-4. Scroll xuống "Resource-based policy statements"
-5. Click "Add permissions"
-6. **Statement ID**: `AllowCognitoInvoke`
-7. **Principal**: `cognito-idp.amazonaws.com`
-8. **Action**: `lambda:InvokeFunction`
-9. **Source account**: <your-aws-account-id>
-10. **Source ARN**: `arn:aws:cognito-idp:us-east-1:<account-id>:userpool/<user-pool-id>`
-11. Click "Save"
-
----
-
-## Phần 10: Test Lambda Functions
-
-### Bước 1: Test Cognito Post-Confirmation Trigger
-
-1. Go to Lambda console (us-east-1)
-2. Click function: `smoking-cessation-cognito-post-confirmation`
-3. Click "Test" tab
-4. **Test event JSON**:
-
-```json
-{
-  "version": "1",
-  "request": {
-    "userAttributes": {
-      "sub": "12345678-1234-1234-1234-123456789012",
-      "email": "test@example.com",
-      "name": "Test User"
-    }
-  },
-  "response": {}
-}
+```bash
+aws iam get-role --role-name CognitoPostConfirmationLambdaRole --output table --query 'Role.[RoleName,Arn,CreateDate]'
 ```
 
-5. Click "Test"
-6. Verify:
-   - ✅ Execution result: Succeeded
-   - ✅ CloudWatch logs show console.log output
+### Bước 2: List Role Policies
 
-![Test Result](../assets/04-lambda-test-result.png)
-
-### Bước 2: Test Admin Coaches Function
-
-1. Switch to **ap-southeast-1**
-2. Click function: `smoking-cessation-admin-manage-coaches`
-3. Click "Test" tab
-4. **Test event JSON**:
-
-```json
-{
-  "httpMethod": "GET",
-  "path": "/admin/coaches",
-  "headers": {
-    "Authorization": "Bearer test-token"
-  },
-  "body": null
-}
+```bash
+aws iam list-role-policies --role-name AdminOperationsLambdaRole --output table
 ```
 
-5. Click "Test"
-6. Verify status code 200 in response
+### Bước 3: Review Policy Details
 
-### Bước 3: Test Image Upload Function
+For each policy:
 
-1. Click function: `smoking-cessation-image-upload`
-2. Click "Test" tab
-3. **Test event JSON**:
-
-```json
-{
-  "httpMethod": "POST",
-  "path": "/upload",
-  "headers": {
-    "x-filename": "test-image.jpg"
-  },
-  "body": "base64-encoded-image-data",
-  "requestContext": {
-    "authorizer": {
-      "claims": {
-        "sub": "user-123"
-      }
-    }
-  }
-}
+```bash
+aws iam get-role-policy --role-name AdminOperationsLambdaRole --policy-name <PolicyName> --output json
 ```
 
-5. Click "Test"
-6. Verify response contains S3 URL
-
-### Bước 4: View CloudWatch Logs
-
-1. Click "Monitor" tab của bất kỳ function nào
-2. Click "View logs in CloudWatch"
-3. Select most recent log stream
-4. Verify logs show:
-   - Input event
-   - Console.log statements
-   - Execution time
-
-![CloudWatch Logs](../assets/09-cloudwatch-logs.png)
+Check permissions cover:
+- DynamoDB/RDS operations
+- S3 access (if needed)
+- CloudWatch logs
+- VPC access (if RDS in VPC)
 
 ---
 
-## Phần 11: Create CloudWatch Alarms
+## Phần 8: Monitor Lambda Functions
 
-### Bước 1: Create Error Alarm
+### Bước 1: View Metrics
 
-1. Tìm kiếm "CloudWatch"
-2. Click "CloudWatch" service
-3. Left menu: "Alarms" → "All alarms"
-4. Click "Create alarm"
-5. **Metric**: Select Lambda
-6. **Dimension**: Function name
-7. **Statistic**: Sum
-8. **Function**: `smoking-cessation-admin-manage-coaches`
-9. **Metric**: Errors
-10. **Threshold**: > 5 in 1 minute
-11. Click "Next"
-12. **Action**: Create SNS topic
-    - **Topic name**: `smoking-cessation-lambda-errors`
-    - **Email endpoint**: your-email@example.com
-13. Click "Create alarm"
-14. **Check email** để verify SNS subscription
+For each function:
 
-![CloudWatch Alarm](../assets/09-cloudwatch-alarm.png)
+1. Click function
+2. Click "Monitor" tab
+3. View metrics:
+   - Invocations: Total calls
+   - Duration: Execution time
+   - Errors: Failed invocations
+   - Throttles: Rate limit hits
+   - Concurrent Executions: Parallel runs
 
-### Bước 2: Create Duration Alarm
+![Lambda Metrics](../assets/04-lambda-cloudwatch-metrics.png)
 
-1. Click "Create alarm"
-2. **Metric**: Select Lambda → Durations
-3. **Function**: `smoking-cessation-admin-manage-coaches`
-4. **Statistic**: Average
-5. **Threshold**: > 20 seconds (warning if approaching 30s timeout)
-6. Click "Next"
-7. **Action**: Use existing SNS topic `smoking-cessation-lambda-errors`
-8. Click "Create alarm"
+### Bước 2: Setup Alarms (Recommended)
 
-### Bước 3: Create Throttle Alarm
+Create alarms cho:
+- Errors > 5 per minute
+- Duration > 25 seconds
+- Throttles > 0
 
-1. Click "Create alarm"
-2. **Metric**: Lambda → Throttles
-3. **Function**: All functions
-4. **Threshold**: > 0
-5. Click "Next"
-6. **Action**: Notify via SNS
-7. Click "Create alarm"
+Navigate to CloudWatch:
+
+1. CloudWatch → Alarms → Create alarm
+2. Select metric: Lambda Errors
+3. Function: AdminManageCoachesFunction
+4. Threshold: > 5 errors per minute
+5. Action: SNS notification (email)
 
 ---
 
-## Phần 12: Enable X-Ray Tracing (Optional)
+## Phần 9: Optimize Lambda Functions
 
-### Bước 1: Update IAM Role
+### Recommendation 1: Increase Memory (if needed)
 
-1. Go to IAM console
-2. Click "Roles"
-3. Click `smoking-cessation-lambda-role`
-4. Click "Add permissions" → "Attach policies directly"
-5. Search: `AWSXRayWriteAccess`
-6. Check ✅
-7. Click "Attach policies"
+Functions that access database:
+- AdminManageCoachesFunction: 512 MB (OK)
+- image-upload-lambda: 512 MB (increase from 256)
 
-### Bước 2: Enable X-Ray on Functions
+More memory = More CPU = Faster execution = Lower cost
+
+### Recommendation 2: Add Concurrency Limits
+
+Reserve concurrency để prevent cost spikes:
+
+```bash
+aws lambda put-function-concurrency \
+  --function-name AdminManageCoachesFunction \
+  --reserved-concurrent-executions 10 \
+  --region ap-southeast-1
+```
+
+### Recommendation 3: Enable X-Ray Tracing
+
+For better debugging:
+
+1. Function → Configuration
+2. Click "General configuration"
+3. Execution role: Edit
+4. Add "AWSXRayWriteAccessPolicy"
+5. Function → Configuration
+6. Click "Monitoring tools"
+7. Check "X-Ray"
+
+---
+
+## Phần 10: Environment Variables Review
+
+### Bước 1: Check Variables ở Mỗi Function
 
 For each Lambda function:
 
-1. Click function
-2. Click "Configuration" tab
-3. Click "Monitoring and operations tools"
-4. Under "X-Ray": Check ✅ "Active tracing"
-5. Click "Save"
-
----
-
-## Environment Variables Summary
-
-### Cognito Post-Confirmation Function (us-east-1)
-
-```env
-PG_HOST=172.0.8.55
-PG_USER=postgres
-PG_PASSWORD=(from Secrets Manager)
-PG_DATABASE=smoking_cessation
-PG_PORT=5432
-COGNITO_USER_POOL_ID=(from Module 3)
+```bash
+aws lambda get-function-configuration \
+  --function-name <FunctionName> \
+  --region ap-southeast-1 \
+  --query 'Environment.Variables' \
+  --output table
 ```
 
-### Admin Coaches & Payment Functions (ap-southeast-1)
+### Bước 2: Verify Required Variables
 
-```env
-PG_HOST=172.0.8.55
-PG_USER=postgres
-PG_PASSWORD=(from Secrets Manager)
-PG_DATABASE=smoking_cessation
-API_REGION=ap-southeast-1
-STRIPE_API_KEY=(from Secrets Manager)
-STRIPE_WEBHOOK_SECRET=(from Secrets Manager)
+Common variables needed:
+- RDS_ENDPOINT: Database host
+- RDS_USERNAME: Database user
+- RDS_PASSWORD: Database password (use Secrets Manager!)
+- S3_BUCKET: S3 bucket name
+- COGNITO_USER_POOL_ID: User pool ID
+- JWT_SECRET: For token validation
+
+### Bước 3: Use AWS Secrets Manager (Best Practice)
+
+Instead of environment variables for secrets:
+
+```bash
+aws secretsmanager create-secret \
+  --name smoking-cessation/db-password \
+  --secret-string <PASSWORD> \
+  --region ap-southeast-1
 ```
 
-### Image Upload Function (ap-southeast-1)
+Update Lambda code:
 
-```env
-S3_BUCKET=smoking-cessation-images
-S3_REGION=ap-southeast-1
-MAX_FILE_SIZE=10485760
-```
+```javascript
+const secretsManager = new AWS.SecretsManager();
 
-### WebSocket Authorizer (ap-southeast-1)
+const secret = await secretsManager.getSecretValue({
+  SecretId: 'smoking-cessation/db-password'
+}).promise();
 
-```env
-COGNITO_USER_POOL_ID=(from Module 3)
-COGNITO_CLIENT_ID=(from Module 3)
-JWT_SECRET=(from Secrets Manager)
+const dbPassword = JSON.parse(secret.SecretString).password;
 ```
 
 ---
 
 ## Checklist
 
-- [ ] IAM role `smoking-cessation-lambda-role` created
-- [ ] Cognito Post-Confirmation function created (us-east-1)
-- [ ] Admin Coaches function created (ap-southeast-1)
-- [ ] Image Upload function created (ap-southeast-1)
-- [ ] WebSocket Authorizer function created (ap-southeast-1)
-- [ ] Payment function created (ap-southeast-1)
-- [ ] All functions have correct runtime & memory
-- [ ] Environment variables configured for all functions
-- [ ] Secrets Manager setup (db-password, stripe-api-key)
-- [ ] Cognito trigger configured (post-confirmation)
-- [ ] Lambda resource-based policy added for Cognito
-- [ ] All functions tested successfully
-- [ ] CloudWatch alarms created (errors, duration, throttles)
-- [ ] X-Ray tracing enabled (optional)
+- [ ] All 5 Lambda functions verified
+- [ ] CognitoPostConfirmationTrigger trigger verified
+- [ ] API Gateway integrations verified
 - [ ] CloudWatch logs reviewed
-- [ ] Sẵn sàng cho Module 5 (Setup API Gateway)
+- [ ] IAM roles & permissions checked
+- [ ] Environment variables configured
+- [ ] Functions tested successfully
+- [ ] Metrics & alarms configured
+- [ ] Secrets stored in Secrets Manager
+- [ ] X-Ray tracing enabled (optional)
+- [ ] Memory & timeout optimized
+- [ ] Ready for Module 5 (Verify API Gateway)
 
 ---
 
 ## Troubleshooting
 
-### Function Execution Failed
+### Function Timeout
 
-**Issue**: "An error occurred while getting the logs from CloudWatch"
+Issue: "Task timed out after 30 seconds"
 
-**Solution**:
-1. Check IAM role has `AWSLambdaBasicExecutionRole`
-2. Wait 1-2 minutes for logs to appear
-3. Check function code for syntax errors
-
-### Cognito Trigger Not Working
-
-**Issue**: "User created but Lambda function didn't execute"
-
-**Solution**:
-1. Verify trigger is enabled in Cognito console
-2. Check Lambda resource-based policy exists
-3. Review CloudWatch logs for errors
-4. Check IAM role permissions
-
-### Timeout Errors
-
-**Issue**: "Task timed out after 30 seconds"
-
-**Solution**:
-1. Increase timeout to 60 seconds
-2. Check database connectivity (VPC configuration in Module 8)
-3. Add console logs to identify slow operations
-4. Consider increasing memory (also increases CPU)
+Solution:
+- Increase timeout: 60 seconds
+- Check database connection (VPC issue?)
+- Add connection pooling
 
 ### Permission Denied
 
-**Issue**: "User is not authorized to perform: secretsmanager:GetSecretValue"
+Issue: "User is not authorized to perform: dynamodb:Query"
 
-**Solution**:
-1. Add secrets manager policy to Lambda role
-2. Verify policy resource ARN matches secret name
-3. Check secret exists in correct region
+Solution:
+- Add IAM policy to role
+- Use Secrets Manager for credentials
 
-### Cold Start Issues
+### Cold Start
 
-**Issue**: "High duration on first invocation"
+Issue: Long duration on first invocation
 
-**Solution**:
-1. Increase memory allocation (256 → 512 MB)
-2. Consider provisioned concurrency for frequently used functions
-3. Optimize code dependencies
+Solution:
+- Increase memory (also increases CPU)
+- Use Lambda provisioned concurrency
+- Use Lambda warmup events
+
+### Out of Memory
+
+Issue: "Process exited before completing request"
+
+Solution:
+- Increase memory allocation
+- Optimize code (leak memory?)
+- Split into smaller functions
 
 ---
 
-## Next Steps
+## Notes
 
-1. Implement actual code for each Lambda function (provided separately)
-2. Setup database connections to EC2 instances (Module 6)
-3. Create API Gateway routes (Module 5)
-4. Test end-to-end flow
-5. Optimize based on CloudWatch metrics
+- All functions using Node.js 20.x (current LTS)
+- Timeout varies: 10s (image upload) to 30s (default)
+- Roles have principle of least privilege
+- CloudWatch logs retention: Check & set appropriately
 
 ---
 
 ## Kết Quả Đạt Được
 
-Sau Module 4, bạn sẽ có:
+Sau Module 4:
 
-1. ✅ 5 Lambda functions created và deployed
-2. ✅ IAM role với appropriate permissions
-3. ✅ Environment variables configured
-4. ✅ Secrets Manager setup cho sensitive data
-5. ✅ Cognito post-confirmation trigger configured
-6. ✅ Resource-based policies for Cognito invocation
-7. ✅ CloudWatch alarms setup
-8. ✅ X-Ray tracing enabled (optional)
-9. ✅ All functions tested và verified
-10. ✅ Sẵn sàng cho Module 5 (Create API Gateway)
+1. Tất cả 5 Lambda functions verified
+2. Configuration & roles reviewed
+3. API Gateway integration confirmed
+4. CloudWatch monitoring setup
+5. Performance optimized
+6. Ready to verify API Gateway (Module 5)

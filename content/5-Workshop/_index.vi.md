@@ -144,7 +144,7 @@ Verify 4 EC2 instances & databases:
 
 **Thêm hình ảnh**: EC2 instances, instance status, monitoring dashboard
 
-[Tới Module 6](./5.6-Setup-rds-database/_index.vi.md)
+[Tới Module 6](./6-setup-rds-database/_index.md)
 
 ---
 
@@ -368,7 +368,7 @@ Hãy thay thế bằng actual screenshots từ AWS Console:
 ### Performance
 - CloudFront caching
 - Lambda memory optimization
-- EC2 database instance tuning (optional)
+- RDS read replicas (optional)
 - Connection pooling
 
 ### Cost Optimization
@@ -399,7 +399,7 @@ Hãy thay thế bằng actual screenshots từ AWS Console:
 
 **Lambda timeout errors**
 - Solution: Increase timeout in Module 4
-- Check EC2 database connection in Module 6
+- Check RDS connection in Module 6
 
 **API Gateway CORS errors**
 - Solution: Enable CORS in Module 5
@@ -414,7 +414,7 @@ Xem detailed troubleshooting sections ở mỗi module.
 ### AWS Documentation
 - [Lambda Documentation](https://docs.aws.amazon.com/lambda/)
 - [API Gateway Documentation](https://docs.aws.amazon.com/apigateway/)
-- [EC2 Documentation](https://docs.aws.amazon.com/ec2/)
+- [RDS Documentation](https://docs.aws.amazon.com/rds/)
 - [CloudFront Documentation](https://docs.aws.amazon.com/cloudfront/)
 - [Cognito Documentation](https://docs.aws.amazon.com/cognito/)
 
