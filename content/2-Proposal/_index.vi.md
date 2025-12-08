@@ -157,3 +157,4 @@ Hệ thống tận dụng các dịch vụ được quản lý bởi AWS để �
 
 ---
 
+Documentation for download: [Proposal.docx](/Proposal.docx)

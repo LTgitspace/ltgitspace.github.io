@@ -14,7 +14,7 @@ chapter: false
 
 &emsp; **Email:** tuannleeeee@gmail.com
 
-&emsp; **University:** HFPT university
+&emsp; **University:** FPT university
 
 &emsp; **Major:** Software Engineering
 

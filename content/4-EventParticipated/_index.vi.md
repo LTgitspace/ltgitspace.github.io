@@ -1,46 +1,49 @@
 ---
-title: "Các events đã tham gia"
-date: "2025-01-01"
+title: "AWS Cloud Mastery Series #2 - DevOps trên AWS"
+date: 2025-11-17
 weight: 4
 chapter: false
-pre: " <b> 4. </b> "
+pre: " <b> 4.4. </b> "
 ---
 
-{{% notice warning %}}
-⚠️ **Lưu ý:** Các thông tin dưới đây chỉ nhằm mục đích tham khảo, vui lòng **không sao chép nguyên văn** cho bài báo cáo của bạn kể cả warning này.
-{{% /notice %}}
+### AWS Cloud Mastery Series #2 - DevOps trên AWS
 
-> Trong phần này, các bạn cần liệt kê và mô tả chi tiết các sự kiện (event) mà mình đã tham gia trong suốt quá trình thực tập hoặc làm việc. 
-> 
-> Mỗi sự kiện nên được trình bày theo định dạng Event 1, Event 2, Event 3…, kèm theo các thông tin:
-> * Tên sự kiện
-> * Thời gian tổ chức
-> * Địa điểm (nếu có)
-> * Vai trò của bạn trong sự kiện (người tham dự, hỗ trợ tổ chức, diễn giả, v.v.)
-> * Mô tả ngắn gọn nội dung và hoạt động chính trong sự kiện
-> * Kết quả hoặc giá trị đạt được (bài học, kỹ năng mới, đóng góp cho nhóm/dự án)
-> * Việc liệt kê này giúp thể hiện rõ sự tham gia thực tế của bạn, cũng như các kỹ năng mềm và kinh nghiệm bạn đã tích lũy qua từng sự kiện.
+**- Ngày:** 17 tháng 11, 2025 (Cả ngày)
+**- Địa điểm:** Bitexco Financial Tower, Quận 1, TP. Hồ Chí Minh
 
 
-Trong quá trình thực tập, em đã tham gia 2 events, với mỗi event là một trải nghiệm đáng nhớ với những kiến thức mới, hay và bổ ích, cùng với đó là nhứng món quà và những khoảnh khắc rất tuyệt vời.
+---
 
-### [Event 1](4.1-Event1/)
-&emsp;**Tên sự kiện:** GenAI-powered App-DB Modernization workshop
+#### Tổng quan Sự kiện
 
-&emsp;**Thời gian:** 09:00 ngày 13/08/2025
+Sự kiện chuyên sâu kéo dài cả ngày này tập trung vào việc áp dụng Văn hóa DevOps, các công cụ CI/CD (Tích hợp liên tục/Triển khai liên tục) của AWS, và các công nghệ hiện đại hóa như Infrastructure as Code (IaC) và Containerization.
 
-&emsp;**Địa điểm:** Tầng 26, tòa nhà Bitexco, số 02 đường Hải Triều, phường Sài Gòn, thành phố Hồ Chí Minh
+**Mục tiêu chính:**
+* **Phát triển Tư duy DevOps:** Hiểu rõ văn hóa, nguyên tắc và các chỉ số hiệu suất chính (DORA, MTTR, deployment frequency).
+* **Xây dựng CI/CD:** Nắm vững cách sử dụng bộ dịch vụ AWS Code (CodeCommit, CodeBuild, CodeDeploy, CodePipeline) để tự động hóa quy trình phát hành.
+* **Triển khai IaC:** Thực hành triển khai và quản lý cơ sở hạ tầng bằng **AWS CloudFormation** và **AWS CDK**.
+* **Hiện đại hóa Ứng dụng:** Tìm hiểu về containerization, lưu trữ (ECR), và quản lý orchestration (ECS/EKS).
+* **Cải thiện Observability:** Thiết lập hệ thống giám sát toàn diện bằng **CloudWatch** và **AWS X-Ray** để truy vết phân tán.
 
-&emsp;**Vai trò trong sự kiện:** Người tham dự 
+---
 
+#### Bài học và Kiến thức cốt lõi (Key Takeaways)
 
+* **Văn hóa là Nền tảng:** DevOps là sự kết hợp giữa văn hóa, nguyên tắc và công cụ; các chỉ số DORA là thước đo quan trọng cho sự thành công của đội ngũ.
+* **Tự động hóa Triệt để:** Toàn bộ quá trình từ mã nguồn (**CodeCommit**) đến triển khai (**CodePipeline/CodeDeploy**) phải được tự động hóa, ưu tiên các chiến lược triển khai an toàn như Blue/Green và Canary.
+* **IaC là Bắt buộc:** Quản lý cơ sở hạ tầng dưới dạng mã (IaC) giúp tăng khả năng lặp lại, giảm thiểu lỗi thủ công, và dễ dàng phát hiện độ lệch (drift detection) trong CloudFormation.
+* **Container cho Microservices:** Sử dụng Docker cùng với các dịch vụ quản lý container của AWS (ECS, EKS, App Runner) là mô hình chuẩn để triển khai kiến trúc microservices.
+* **Tracing Phân tán:** **AWS X-Ray** rất cần thiết để hiểu rõ hiệu suất và điểm nghẽn trong các hệ thống phân tán, bổ sung cho các metrics và logs truyền thống của **CloudWatch**.
 
-### [Event 2](4.2-Event2/)
-&emsp;**Tên sự kiện:** GenAI-powered App-DB Modernization workshop
+---
 
-&emsp;**Thời gian:** 09:00 ngày 13/08/2025
+#### Ứng dụng vào Công việc (Application to Work)
 
-&emsp;**Địa điểm:** Tầng 26, tòa nhà Bitexco, số 02 đường Hải Triều, phường Sài Gòn, thành phố Hồ Chí Minh
+1.  **Đo lường DORA:** Bắt đầu đo lường các chỉ số DORA (Tần suất triển khai, Thời gian quay vòng thay đổi, Thời gian phục hồi sự cố, Tỷ lệ lỗi thay đổi) cho các dự án hiện tại.
+2.  **Chuyển đổi Pipeline:** Lựa chọn một quy trình triển khai thủ công hoặc bán tự động và chuyển đổi hoàn toàn sang **AWS CodePipeline** với các bước Build (CodeBuild) và Deployment (CodeDeploy) tự động.
+3.  **Thí điểm CDK:** Bắt đầu thí điểm sử dụng **AWS CDK** để định nghĩa và triển khai một dịch vụ nhỏ, tận dụng các ngôn ngữ lập trình quen thuộc (ví dụ: Python/TypeScript).
+4.  **Tích hợp X-Ray:** Áp dụng **AWS X-Ray** cho các microservices mới được phát triển để thu thập dữ liệu truy vết (tracing data) và phân tích hiệu suất giữa các thành phần.
 
-&emsp;**Vai trò trong sự kiện:** Người tham dự 
-
+---
+#### Hình ảnh sự kiện
+![Thêm hình ảnh sự kiện của bạn tại đây](path/to/your/image.jpg)
