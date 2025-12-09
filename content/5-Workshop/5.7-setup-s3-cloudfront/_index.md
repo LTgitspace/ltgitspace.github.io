@@ -1,3 +1,11 @@
+---
+title: "Module 7: Verify S3 & CloudFront Frontend Hosting"
+date: "2025-01-01"
+weight: 7
+chapter: false
+pre: " <b> 5.7. </b> "
+---
+
 # Module 7: Verify S3 & CloudFront Frontend Hosting
 
 ## Module Objectives
@@ -257,4 +265,3 @@ Resources you have cleaned up:
 - Security groups and network configurations
 
 You should not incur further charges for these resources.
-

@@ -17,7 +17,7 @@ chapter: false
 
 &emsp; **Ngành:** Kỹ thuật phần mềm
 
-&emsp; **Lớp:** AWS???
+&emsp; **Lớp:** AWS FCAJ
 
 &emsp; **Công ty thực tập:** Công ty TNHH Amazon Web Services Vietnam
 

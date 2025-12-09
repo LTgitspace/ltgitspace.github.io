@@ -18,7 +18,7 @@ chapter: false
 
 &emsp; **Major:** Software Engineering
 
-&emsp; **Class:** AWS???
+&emsp; **Class:** AWS FCAJ
 
 &emsp; **Internship Company:** Amazon Web Services Vietnam Co., Ltd.
 

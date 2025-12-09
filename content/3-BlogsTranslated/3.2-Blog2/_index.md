@@ -5,122 +5,98 @@ weight: 1
 chapter: false
 pre: " <b> 3.2. </b> "
 ---
-{{% notice warning %}}
-⚠️ **Note:** The information below is for reference purposes only. Please **do not copy verbatim** for your report, including this warning.
-{{% /notice %}}
 
-# Getting Started with Healthcare Data Lakes: Using Microservices
 
-Data lakes can help hospitals and healthcare facilities turn data into business insights, maintain business continuity, and protect patient privacy. A **data lake** is a centralized, managed, and secure repository to store all your data, both in its raw and processed forms for analysis. Data lakes allow you to break down data silos and combine different types of analytics to gain insights and make better business decisions.
+# Automate document translation and standardization with Amazon Bedrock and Amazon Translate | Artificial Intelligence
 
-This blog post is part of a larger series on getting started with setting up a healthcare data lake. In my final post of the series, *“Getting Started with Healthcare Data Lakes: Diving into Amazon Cognito”*, I focused on the specifics of using Amazon Cognito and Attribute Based Access Control (ABAC) to authenticate and authorize users in the healthcare data lake solution. In this blog, I detail how the solution evolved at a foundational level, including the design decisions I made and the additional features used. You can access the code samples for the solution in this Git repo for reference.
+**by Nadhya Polanco and Steve Bell**
+*Published on 01 MAY 2025*
+*Categories: Advanced (300), Amazon Bedrock, Amazon Translate, Customer Solutions*
 
 ---
 
-## Architecture Guidance
+Multinational organizations face the complex challenge of effectively managing a workforce and operations across different countries, cultures, and languages. Maintaining consistency and alignment across these global operations can be difficult, especially when it comes to updating and sharing business documents and processes. Delays or miscommunications can lead to productivity losses, operational inefficiencies, or potential business disruptions. Accurate and timely sharing of translated documents across the organization is an important step in making sure that employees have access to the latest information in their native language.
 
-The main change since the last presentation of the overall architecture is the decomposition of a single service into a set of smaller services to improve maintainability and flexibility. Integrating a large volume of diverse healthcare data often requires specialized connectors for each format; by keeping them encapsulated separately as microservices, we can add, remove, and modify each connector without affecting the others. The microservices are loosely coupled via publish/subscribe messaging centered in what I call the “pub/sub hub.”
+In this post, we show how you can automate language localization through translating documents using Amazon Web Services (AWS). The solution combines **Amazon Bedrock** and **AWS Serverless technologies**, a suite of fully managed event-driven services for running code, managing data, and integrating applications—all without managing servers. Amazon Bedrock is a fully managed service that offers a choice of high-performing foundation models (FMs) from leading AI companies like AI21 Labs, Anthropic, Cohere, Meta, Mistral AI, and Stability AI, accessible through a single API, along with a broad set of capabilities you need to build generative AI applications with security, privacy, and responsible AI.
 
-This solution represents what I would consider another reasonable sprint iteration from my last post. The scope is still limited to the ingestion and basic parsing of **HL7v2 messages** formatted in **Encoding Rules 7 (ER7)** through a REST interface.
+## Solution Overview
 
-**The solution architecture is now as follows:**
+The solution uses **AWS Step Functions** to orchestrate the translation of the source document into the specified language (English, French, or Spanish) using **AWS Lambda** functions to call **Amazon Translate**. Amazon Translate currently supports translation of 75 languages, but only three are chosen for this demo. It then uses **Amazon Bedrock** to refine the translation and create natural, flowing content.
 
-> *Figure 1. Overall architecture; colored boxes represent distinct services.*
+Building this solution on AWS fully managed and serverless technologies eliminates the need to operate infrastructure, manage capacity, or invest significant funding upfront. The compute and AI services used to process documents for translation run only on demand, resulting in a consumption-based billing model.
 
----
+### Solution Architecture
 
-While the term *microservices* has some inherent ambiguity, certain traits are common:  
-- Small, autonomous, loosely coupled  
-- Reusable, communicating through well-defined interfaces  
-- Specialized to do one thing well  
-- Often implemented in an **event-driven architecture**
+[Diagram of the document translation and standardization workflow]
 
-When determining where to draw boundaries between microservices, consider:  
-- **Intrinsic**: technology used, performance, reliability, scalability  
-- **Extrinsic**: dependent functionality, rate of change, reusability  
-- **Human**: team ownership, managing *cognitive load*
+The document translation and standardization workflow consists of the following steps:
 
----
+1.  The user uploads their source document requiring translation to the input **Amazon Simple Storage Service (Amazon S3)** bucket. The bucket has three folders: English, French, and Spanish. The document is uploaded to the folder that matches its current language.
+2.  The presence of a new document in the input bucket initiates the **Step Functions** workflow using **Amazon S3 Event Notifications**.
+3.  The first step is an **AWS Lambda function** that retrieves the source document and calls the **Amazon Translate API** `TranslateDocument`.
+4.  The second step is another **Lambda function** that queries **Amazon Bedrock** using a pre-generated prompt, including the translated document. This prompt instructs Amazon Bedrock to perform a **transcreation check** to validate that the intent, style, and tone of the document is maintained. The final version is saved in the output S3 bucket.
+5.  The last step uses **Amazon Simple Notification Service (Amazon SNS)** to notify an SNS topic of the workflow's outcome (success or failure), sending an email to subscribers.
+6.  The user downloads their translated document from the output S3 bucket.
 
-## Technology Choices and Communication Scope
+This solution is available on GitHub and provides the **AWS Cloud Development Kit (AWS CDK)** code to deploy in your own AWS account.
 
-| Communication scope                       | Technologies / patterns to consider                                                        |
-| ----------------------------------------- | ------------------------------------------------------------------------------------------ |
-| Within a single microservice              | Amazon Simple Queue Service (Amazon SQS), AWS Step Functions                               |
-| Between microservices in a single service | AWS CloudFormation cross-stack references, Amazon Simple Notification Service (Amazon SNS) |
-| Between services                          | Amazon EventBridge, AWS Cloud Map, Amazon API Gateway                                      |
+## Prerequisites
 
----
+For this walkthrough, you should have the following prerequisites:
 
-## The Pub/Sub Hub
+* An AWS account.
+* An AWS Identity and Access Management (IAM) role with sufficient permissions (administrator access is sufficient).
+* The AWS CDK installed on your local machine, or an AWS Cloud9 environment.
+* Python 3.9 or later.
+* Docker.
 
-Using a **hub-and-spoke** architecture (or message broker) works well with a small number of tightly related microservices.  
-- Each microservice depends only on the *hub*  
-- Inter-microservice connections are limited to the contents of the published message  
-- Reduces the number of synchronous calls since pub/sub is a one-way asynchronous *push*
+## Deployment Steps
 
-Drawback: **coordination and monitoring** are needed to avoid microservices processing the wrong message.
+To deploy this solution:
 
----
+1.  Open your code editor and authenticate to your AWS account.
+2.  Clone the solution from the GitHub repository:
+    ```bash
+    git clone [https://github.com/aws-samples/sample-document-standardization-with-bedrock-and-translate.git](https://github.com/aws-samples/sample-document-standardization-with-bedrock-and-translate.git)
+    ```
+3.  Follow the deployment instructions in the repository README file.
+4.  After the stack is deployed, navigate to the S3 bucket created: `docstandardizationstack-inputbucket`.
+5.  Upload the `word_template.docx` file included in the repository to automatically create the English, French, and Spanish folders.
+6.  Navigate to the **Amazon SNS console** and create a subscription to the topic `DocStandardizationStack-ResultTopic`. **Confirm the subscription** via the automated email.
 
-## Core Microservice
+## Language Translation
 
-Provides foundational data and communication layer, including:  
-- **Amazon S3** bucket for data  
-- **Amazon DynamoDB** for data catalog  
-- **AWS Lambda** to write messages into the data lake and catalog  
-- **Amazon SNS** topic as the *hub*  
-- **Amazon S3** bucket for artifacts such as Lambda code
+To test the workflow, upload a `.docx` file (like the included `tone_test.docx`) to the folder corresponding to the document's original language (e.g., the `English` folder).
 
-> Only allow indirect write access to the data lake through a Lambda function → ensures consistency.
+The Step Functions state machine will start, and translated versions of your source document will be added to the other language folders.
 
----
+### Transcreation Process
 
-## Front Door Microservice
+The translated documents are then processed using **Amazon Bedrock**. Amazon Bedrock reviews the documents' intent, style, and tone for use in a business setting. You can customize the output tone and style by modifying the Amazon Bedrock prompt.
 
-- Provides an API Gateway for external REST interaction  
-- Authentication & authorization based on **OIDC** via **Amazon Cognito**  
-- Self-managed *deduplication* mechanism using DynamoDB instead of SNS FIFO because:  
-  1. SNS deduplication TTL is only 5 minutes  
-  2. SNS FIFO requires SQS FIFO  
-  3. Ability to proactively notify the sender that the message is a duplicate  
+The final documents are added to the output S3 bucket (`DocStandardizationStack-OutputBucket`) with a suffix of `_corrected`.
 
----
 
-## Staging ER7 Microservice
+The prompt used for the transcreation task is designed to produce consistent and valid adjustments by including specific instructions and rules to define boundaries that control adjustments.
 
-- Lambda “trigger” subscribed to the pub/sub hub, filtering messages by attribute  
-- Step Functions Express Workflow to convert ER7 → JSON  
-- Two Lambdas:  
-  1. Fix ER7 formatting (newline, carriage return)  
-  2. Parsing logic  
-- Result or error is pushed back into the pub/sub hub  
+When the documents have been processed, you will receive an SNS notification.
 
----
+## Clean up
 
-## New Features in the Solution
+To delete the deployed resources, run the command `cdk destroy` in your terminal, or use the CloudFormation console to delete the CloudFormation stack `DocStandardizationStack`.
 
-### 1. AWS CloudFormation Cross-Stack References
-Example *outputs* in the core microservice:
-```yaml
-Outputs:
-  Bucket:
-    Value: !Ref Bucket
-    Export:
-      Name: !Sub ${AWS::StackName}-Bucket
-  ArtifactBucket:
-    Value: !Ref ArtifactBucket
-    Export:
-      Name: !Sub ${AWS::StackName}-ArtifactBucket
-  Topic:
-    Value: !Ref Topic
-    Export:
-      Name: !Sub ${AWS::StackName}-Topic
-  Catalog:
-    Value: !Ref Catalog
-    Export:
-      Name: !Sub ${AWS::StackName}-Catalog
-  CatalogArn:
-    Value: !GetAtt Catalog.Arn
-    Export:
-      Name: !Sub ${AWS::StackName}-CatalogArn
+## Conclusion
+
+This post demonstrated how to automate the translation of business documents using AWS AI and serverless technologies. This automated process can improve communication, consistency, and alignment across global operations. By embracing the capabilities of AWS, companies can focus on their core business objectives without creating additional IT infrastructure overhead.
+
+*Bonne traduction!*
+
+*Feliz traducción!*
+
+*Happy translating!*
+
+### Further reading
+
+The solution includes a zero-shot prompt with specific instructions. To adjust your results, you can use the **Amazon Bedrock Prompt Management** tool to quickly edit and test the impact of changes to the prompt text.
+
+For additional examples, visit the [AWS Workshops page](https://aws.amazon.com/training/aws-workshops/).

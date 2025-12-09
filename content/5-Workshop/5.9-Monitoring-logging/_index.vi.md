@@ -1,3 +1,11 @@
+---
+title: "Module 9: Monitoring, Logging & Alerts"
+date: "2025-01-01"
+weight: 9
+chapter: false
+pre: " <b> 5.9. </b> "
+---
+
 # Module 9: Setup CloudWatch Monitoring, Logging & Alerts
 
 ## Mục tiêu Module

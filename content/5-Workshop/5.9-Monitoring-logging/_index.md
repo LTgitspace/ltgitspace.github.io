@@ -1,3 +1,11 @@
+---
+title: "Module 9: Monitoring, Logging & Alerts"
+date: "2025-01-01"
+weight: 9
+chapter: false
+pre: " <b> 5.9. </b> "
+---
+
 # Module 9: Monitoring, Logging & Alerts
 
 ## Module Objectives
@@ -278,4 +286,3 @@ aws budgets create-budget \
 - S3 Intelligent-Tiering (automatic cost optimization)
 - Lambda cost optimization (memory tuning)
 - RDS reserved instances or switch to Aurora serverless
-

@@ -1,3 +1,11 @@
+---
+title: "Module 6: Verify EC2 Servers & Databases"
+date: "2025-01-01"
+weight: 6
+chapter: false
+pre: " <b> 5.6. </b> "
+---
+
 # Module 6: Verify EC2 Servers & Databases
 
 ## Module Objectives
@@ -229,4 +237,3 @@ aws ec2 create-snapshot \
 ```
 
 Schedule regular snapshots for disaster recovery.
-

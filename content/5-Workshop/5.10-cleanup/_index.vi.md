@@ -1,3 +1,11 @@
+---
+title: "Module 10: Cleanup & Cost Optimization"
+date: "2025-01-01"
+weight: 10
+chapter: false
+pre: " <b> 5.10. </b> "
+---
+
 # Module 10: Cleanup & Cost Optimization
 
 ## Mục tiêu Module

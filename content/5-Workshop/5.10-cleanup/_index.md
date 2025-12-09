@@ -1,3 +1,11 @@
+---
+title: "Module 10: Cleanup & Cost Optimization"
+date: "2025-01-01"
+weight: 10
+chapter: false
+pre: " <b> 5.10. </b> "
+---
+
 # Module 10: Cleanup & Cost Optimization
 
 ## Module Objectives
@@ -549,4 +557,3 @@ EC2 instances should have IAM role with permissions:
 4. **Monitor with VPC Flow Logs**
    - Detect anomalous traffic patterns
    - Troubleshoot connectivity issues
-
